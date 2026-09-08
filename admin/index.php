@@ -4,13 +4,17 @@ require dirname(__DIR__) . '/app/bootstrap.php';
 
 $page = $_GET['page'] ?? 'dashboard';
 
-// ── Logout ──────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+// LOGOUT
+// ══════════════════════════════════════════════════════════════
 if ($page === 'logout') {
     Auth::logout();
     redirect(url('admin/index.php?page=login'));
 }
 
-// ── Login ───────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+// LOGIN (publik, sebelum guard)
+// ══════════════════════════════════════════════════════════════
 if ($page === 'login') {
     if (Auth::check()) {
         redirect(url('admin/index.php?page=dashboard'));
@@ -52,146 +56,405 @@ if ($page === 'login') {
     exit;
 }
 
-// ── Guard: harus login ─────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+// GUARD: wajib login sebelum mengakses route lain
+// ══════════════════════════════════════════════════════════════
 Auth::guard();
 
-// ── Routing ─────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+// ROUTING
+// ══════════════════════════════════════════════════════════════
 switch ($page) {
 
-    // ── Dashboard ───────────────────────────────────────
+    // ── Dashboard ─────────────────────────────────────────────
     case 'dashboard':
-        View::render('admin/dashboard', [
-            'title' => 'Dashboard Admin | ' . APP_NAME,
-        ], 'layouts/admin');
+        AdminDashboard::index();
         break;
 
-    // ── Berita & Pengumuman ─────────────────────────────
-    case 'berita':         AdminNews::index();                              break;
-    case 'berita-tambah':  AdminNews::create();                             break;
-    case 'berita-simpan':  AdminNews::store();                              break;
-    case 'berita-edit':    AdminNews::edit((int) ($_GET['id'] ?? 0));       break;
-    case 'berita-update':  AdminNews::update();                             break;
-    case 'berita-hapus':   AdminNews::destroy();                            break;
-    case 'berita-bulk': AdminNews::bulk(); break;
+    // ── Berita & Pengumuman ───────────────────────────────────
+    case 'berita':
+        AdminNews::index();
+        break;
+    case 'berita-tambah':
+        AdminNews::create();
+        break;
+    case 'berita-simpan':
+        AdminNews::store();
+        break;
+    case 'berita-edit':
+        AdminNews::edit((int) ($_GET['id'] ?? 0));
+        break;
+    case 'berita-update':
+        AdminNews::update();
+        break;
+    case 'berita-hapus':
+        AdminNews::destroy();
+        break;
+    case 'berita-bulk':
+        AdminNews::bulk();
+        break;
 
-    // ── Dokumen & Unduhan ───────────────────────────────
-    case 'dokumen':         AdminDocuments::index();                        break;
-    case 'dokumen-tambah':  AdminDocuments::create();                       break;
-    case 'dokumen-simpan':  AdminDocuments::store();                        break;
-    case 'dokumen-edit':    AdminDocuments::edit((int) ($_GET['id'] ?? 0)); break;
-    case 'dokumen-update':  AdminDocuments::update();                       break;
-    case 'dokumen-hapus':   AdminDocuments::destroy();                      break;
+    // ── Dokumen & Unduhan ─────────────────────────────────────
+    case 'dokumen':
+        AdminDocuments::index();
+        break;
+    case 'dokumen-tambah':
+        AdminDocuments::create();
+        break;
+    case 'dokumen-simpan':
+        AdminDocuments::store();
+        break;
+    case 'dokumen-edit':
+        AdminDocuments::edit((int) ($_GET['id'] ?? 0));
+        break;
+    case 'dokumen-update':
+        AdminDocuments::update();
+        break;
+    case 'dokumen-hapus':
+        AdminDocuments::destroy();
+        break;
 
-    // ── Penelitian ──────────────────────────────────────
-    case 'penelitian':         AdminResearch::index();                         break;
-    case 'penelitian-tambah':  AdminResearch::create();                        break;
-    case 'penelitian-simpan':  AdminResearch::store();                         break;
-    case 'penelitian-edit':    AdminResearch::edit((int) ($_GET['id'] ?? 0));  break;
-    case 'penelitian-update':  AdminResearch::update();                        break;
-    case 'penelitian-hapus':   AdminResearch::destroy();                       break;
+    // ── Galeri Kegiatan ───────────────────────────────────────
+    case 'galeri':
+        AdminGallery::index();
+        break;
+    case 'galeri-tambah':
+        AdminGallery::create();
+        break;
+    case 'galeri-simpan':
+        AdminGallery::store();
+        break;
+    case 'galeri-edit':
+        AdminGallery::edit((int) ($_GET['id'] ?? 0));
+        break;
+    case 'galeri-update':
+        AdminGallery::update();
+        break;
+    case 'galeri-hapus':
+        AdminGallery::destroy();
+        break;
 
-    // ── Pengabdian & KKN ────────────────────────────────
-    case 'pengabdian':         AdminCommunity::index();                        break;
-    case 'pengabdian-tambah':  AdminCommunity::create();                       break;
-    case 'pengabdian-simpan':  AdminCommunity::store();                        break;
-    case 'pengabdian-edit':    AdminCommunity::edit((int) ($_GET['id'] ?? 0)); break;
-    case 'pengabdian-update':  AdminCommunity::update();                       break;
-    case 'pengabdian-hapus':   AdminCommunity::destroy();                      break;
+    // ── Penelitian ────────────────────────────────────────────
+    case 'penelitian':
+        AdminResearch::index();
+        break;
+    case 'penelitian-tambah':
+        AdminResearch::create();
+        break;
+    case 'penelitian-simpan':
+        AdminResearch::store();
+        break;
+    case 'penelitian-edit':
+        AdminResearch::edit((int) ($_GET['id'] ?? 0));
+        break;
+    case 'penelitian-update':
+        AdminResearch::update();
+        break;
+    case 'penelitian-hapus':
+        AdminResearch::destroy();
+        break;
 
-    // ── Publikasi Ilmiah ────────────────────────────────
-    case 'publikasi':         AdminPublication::index();                        break;
-    case 'publikasi-tambah':  AdminPublication::create();                       break;
-    case 'publikasi-simpan':  AdminPublication::store();                        break;
-    case 'publikasi-edit':    AdminPublication::edit((int) ($_GET['id'] ?? 0)); break;
-    case 'publikasi-update':  AdminPublication::update();                       break;
-    case 'publikasi-hapus':   AdminPublication::destroy();                      break;
+    // ── Pengabdian & KKN ──────────────────────────────────────
+    case 'pengabdian':
+        AdminCommunity::index();
+        break;
+    case 'pengabdian-tambah':
+        AdminCommunity::create();
+        break;
+    case 'pengabdian-simpan':
+        AdminCommunity::store();
+        break;
+    case 'pengabdian-edit':
+        AdminCommunity::edit((int) ($_GET['id'] ?? 0));
+        break;
+    case 'pengabdian-update':
+        AdminCommunity::update();
+        break;
+    case 'pengabdian-hapus':
+        AdminCommunity::destroy();
+        break;
 
-    // ── HAKI ────────────────────────────────────────────
-    case 'haki':         AdminHaki::index();                              break;
-    case 'haki-tambah':  AdminHaki::create();                             break;
-    case 'haki-simpan':  AdminHaki::store();                              break;
-    case 'haki-edit':    AdminHaki::edit((int) ($_GET['id'] ?? 0));       break;
-    case 'haki-update':  AdminHaki::update();                             break;
-    case 'haki-hapus':   AdminHaki::destroy();                            break;
+    // ── Publikasi Ilmiah ──────────────────────────────────────
+    case 'publikasi':
+        AdminPublication::index();
+        break;
+    case 'publikasi-tambah':
+        AdminPublication::create();
+        break;
+    case 'publikasi-simpan':
+        AdminPublication::store();
+        break;
+    case 'publikasi-edit':
+        AdminPublication::edit((int) ($_GET['id'] ?? 0));
+        break;
+    case 'publikasi-update':
+        AdminPublication::update();
+        break;
+    case 'publikasi-hapus':
+        AdminPublication::destroy();
+        break;
 
-    // ── AIK & Catur Dharma ──────────────────────────────
-    case 'aik':         AdminAik::index();                              break;
-    case 'aik-tambah':  AdminAik::create();                             break;
-    case 'aik-simpan':  AdminAik::store();                              break;
-    case 'aik-edit':    AdminAik::edit((int) ($_GET['id'] ?? 0));       break;
-    case 'aik-update':  AdminAik::update();                             break;
-    case 'aik-hapus':   AdminAik::destroy();                            break;
+    // ── HAKI (Hak Kekayaan Intelektual) ───────────────────────
+    case 'haki':
+        AdminHaki::index();
+        break;
+    case 'haki-tambah':
+        AdminHaki::create();
+        break;
+    case 'haki-simpan':
+        AdminHaki::store();
+        break;
+    case 'haki-edit':
+        AdminHaki::edit((int) ($_GET['id'] ?? 0));
+        break;
+    case 'haki-update':
+        AdminHaki::update();
+        break;
+    case 'haki-hapus':
+        AdminHaki::destroy();
+        break;
 
-    // ── Hibah & Pendanaan ───────────────────────────────
-    case 'hibah':         AdminGrant::index();                              break;
-    case 'hibah-tambah':  AdminGrant::create();                             break;
-    case 'hibah-simpan':  AdminGrant::store();                              break;
-    case 'hibah-edit':    AdminGrant::edit((int) ($_GET['id'] ?? 0));       break;
-    case 'hibah-update':  AdminGrant::update();                             break;
-    case 'hibah-hapus':   AdminGrant::destroy();                            break;
+    // ── AIK & Catur Dharma ────────────────────────────────────
+    case 'aik':
+        AdminAik::index();
+        break;
+    case 'aik-tambah':
+        AdminAik::create();
+        break;
+    case 'aik-simpan':
+        AdminAik::store();
+        break;
+    case 'aik-edit':
+        AdminAik::edit((int) ($_GET['id'] ?? 0));
+        break;
+    case 'aik-update':
+        AdminAik::update();
+        break;
+    case 'aik-hapus':
+        AdminAik::destroy();
+        break;
 
-    // ── Kontak & FAQ ───────────────────────────────────
-    case 'kontak':              AdminContact::index();                              break;
-    case 'kontak-simpan':       AdminContact::updateContact();                      break;
-    case 'kontak-faq-tambah':   AdminContact::createFaqForm();                      break;
-    case 'kontak-faq-simpan':   AdminContact::storeFaq();                           break;
-    case 'kontak-faq-edit':     AdminContact::editFaqForm((int) ($_GET['id'] ?? 0)); break;
-    case 'kontak-faq-update':   AdminContact::updateFaq();                          break;
-    case 'kontak-faq-hapus':    AdminContact::destroyFaq();                         break;
+    // ── Hibah & Pendanaan ─────────────────────────────────────
+    case 'hibah':
+        AdminGrant::index();
+        break;
+    case 'hibah-tambah':
+        AdminGrant::create();
+        break;
+    case 'hibah-simpan':
+        AdminGrant::store();
+        break;
+    case 'hibah-edit':
+        AdminGrant::edit((int) ($_GET['id'] ?? 0));
+        break;
+    case 'hibah-update':
+        AdminGrant::update();
+        break;
+    case 'hibah-hapus':
+        AdminGrant::destroy();
+        break;
 
-    case 'galeri':         AdminGallery::index();                            break;
-    case 'galeri-tambah':  AdminGallery::create();                           break;
-    case 'galeri-simpan':  AdminGallery::store();                            break;
-    case 'galeri-edit':    AdminGallery::edit((int) ($_GET['id'] ?? 0));     break;
-    case 'galeri-update':  AdminGallery::update();                           break;
-    case 'galeri-hapus':   AdminGallery::destroy();                          break;
+    // ── Kontak & FAQ ──────────────────────────────────────────
+    case 'kontak':
+        AdminContact::index();
+        break;
+    case 'kontak-simpan':
+        AdminContact::updateContact();
+        break;
+    case 'kontak-faq-tambah':
+        AdminContact::createFaqForm();
+        break;
+    case 'kontak-faq-simpan':
+        AdminContact::storeFaq();
+        break;
+    case 'kontak-faq-edit':
+        AdminContact::editFaqForm((int) ($_GET['id'] ?? 0));
+        break;
+    case 'kontak-faq-update':
+        AdminContact::updateFaq();
+        break;
+    case 'kontak-faq-hapus':
+        AdminContact::destroyFaq();
+        break;
 
-    case 'sertifikat':          AdminCertificate::index();                          break;
-    case 'sertifikat-tambah':   AdminCertificate::create();                         break;
-    case 'sertifikat-simpan':   AdminCertificate::store();                          break;
-    case 'sertifikat-edit':     AdminCertificate::edit((int) ($_GET['id'] ?? 0));   break;
-    case 'sertifikat-update':   AdminCertificate::update();                         break;
-    case 'sertifikat-cabut':    AdminCertificate::revoke();                         break;
-    case 'sertifikat-aktifkan': AdminCertificate::restore();                        break;
-    case 'sertifikat-hapus':    AdminCertificate::destroy();                        break;
+    // ── Sertifikat Digital & Verifikasi ───────────────────────
+    case 'sertifikat':
+        AdminCertificate::index();
+        break;
+    case 'sertifikat-tambah':
+        AdminCertificate::create();
+        break;
+    case 'sertifikat-simpan':
+        AdminCertificate::store();
+        break;
+    case 'sertifikat-edit':
+        AdminCertificate::edit((int) ($_GET['id'] ?? 0));
+        break;
+    case 'sertifikat-update':
+        AdminCertificate::update();
+        break;
+    case 'sertifikat-cabut':
+        AdminCertificate::revoke();
+        break;
+    case 'sertifikat-aktifkan':
+        AdminCertificate::restore();
+        break;
+    case 'sertifikat-hapus':
+        AdminCertificate::destroy();
+        break;
 
-    // ── Pengaturan Website ──────────────────────────────
-    case 'pengaturan':        AdminSettings::edit();   break;
-    case 'pengaturan-simpan': AdminSettings::update(); break;
-    
-    case 'reviewers': AdminReviewer::index(); break;
-case 'reviewers-tambah': AdminReviewer::create(); break;
-case 'reviewers-simpan': AdminReviewer::store(); break;
-case 'reviewers-edit': AdminReviewer::edit((int)($_GET['id'] ?? 0)); break;
-case 'reviewers-update': AdminReviewer::update(); break;
-case 'reviewers-hapus': AdminReviewer::destroy(); break;
-case 'reviewers-assign': AdminReviewer::assign(); break;
-case 'reviewers-selesai': AdminReviewer::complete(); break;
-case 'events': AdminEvent::index(); break;
-case 'events-tambah': AdminEvent::create(); break;
-case 'events-simpan': AdminEvent::store(); break;
-case 'events-edit': AdminEvent::edit((int)($_GET['id'] ?? 0)); break;
-case 'events-update': AdminEvent::update(); break;
-case 'events-hapus': AdminEvent::destroy(); break;
-case 'notifikasi': AdminNotification::index(); break;
-case 'notifikasi-baca': AdminNotification::markRead(); break;
-case 'notifikasi-baca-semua': AdminNotification::markAll(); break;
-case 'notifikasi-bulk-baca': AdminNotification::bulkMarkRead(); break;
-case 'notifikasi-hapus': AdminNotification::destroy(); break;
-case 'plagiarism': AdminPlagiarism::index(); break;
-case 'plagiarism-tambah': AdminPlagiarism::create(); break;
-case 'plagiarism-simpan': AdminPlagiarism::store(); break;
-case 'plagiarism-lihat': AdminPlagiarism::show((int)($_GET['id'] ?? 0)); break;
-case 'plagiarism-manual': AdminPlagiarism::manualScore(); break;
-case 'plagiarism-ekstrak': AdminPlagiarism::reextract(); break;
-case 'plagiarism-ulang': AdminPlagiarism::recheck(); break;
-case 'plagiarism-export': AdminPlagiarism::export(); break;
-case 'plagiarism-analisis': AdminPlagiarism::analyzeNow(); break;
-case 'plagiarism-hapus': AdminPlagiarism::destroy(); break;
+    // ── Reviewer (Database Pakar) ─────────────────────────────
+    case 'reviewers':
+        AdminReviewer::index();
+        break;
+    case 'reviewers-tambah':
+        AdminReviewer::create();
+        break;
+    case 'reviewers-simpan':
+        AdminReviewer::store();
+        break;
+    case 'reviewers-edit':
+        AdminReviewer::edit((int) ($_GET['id'] ?? 0));
+        break;
+    case 'reviewers-update':
+        AdminReviewer::update();
+        break;
+    case 'reviewers-hapus':
+        AdminReviewer::destroy();
+        break;
+    case 'reviewers-assign':
+        AdminReviewer::assign();
+        break;
+    case 'reviewers-selesai':
+        AdminReviewer::complete();
+        break;
 
-    // ── 404 ─────────────────────────────────────────────
+    // ── Kalender Kegiatan & Event ─────────────────────────────
+    case 'events':
+        AdminEvent::index();
+        break;
+    case 'events-tambah':
+        AdminEvent::create();
+        break;
+    case 'events-simpan':
+        AdminEvent::store();
+        break;
+    case 'events-edit':
+        AdminEvent::edit((int) ($_GET['id'] ?? 0));
+        break;
+    case 'events-update':
+        AdminEvent::update();
+        break;
+    case 'events-hapus':
+        AdminEvent::destroy();
+        break;
+
+    // ── Cek Plagiat & Similaritas ─────────────────────────────
+    case 'plagiarism':
+        AdminPlagiarism::index();
+        break;
+    case 'plagiarism-tambah':
+        AdminPlagiarism::create();
+        break;
+    case 'plagiarism-simpan':
+        AdminPlagiarism::store();
+        break;
+    case 'plagiarism-lihat':
+        AdminPlagiarism::show((int) ($_GET['id'] ?? 0));
+        break;
+    case 'plagiarism-manual':
+        AdminPlagiarism::manualScore();
+        break;
+    case 'plagiarism-ekstrak':
+        AdminPlagiarism::reextract();
+        break;
+    case 'plagiarism-ulang':
+        AdminPlagiarism::recheck();
+        break;
+    case 'plagiarism-export':
+        AdminPlagiarism::export();
+        break;
+    case 'plagiarism-analisis':
+        AdminPlagiarism::analyzeNow();
+        break;
+    case 'plagiarism-hapus':
+        AdminPlagiarism::destroy();
+        break;
+
+    // ── Notifikasi & Pusat Informasi ──────────────────────────
+    case 'notifikasi':
+        AdminNotification::index();
+        break;
+    case 'notifikasi-baca':
+        AdminNotification::markRead();
+        break;
+    case 'notifikasi-baca-semua':
+        AdminNotification::markAll();
+        break;
+    case 'notifikasi-bulk-baca':
+        AdminNotification::bulkMarkRead();
+        break;
+    case 'notifikasi-bersihkan':
+        AdminNotification::clearRead();
+        break;
+    case 'notifikasi-hapus':
+        AdminNotification::destroy();
+        break;
+
+    // ── Pengaturan Website ────────────────────────────────────
+    case 'pengaturan':
+        AdminSettings::edit();
+        break;
+    case 'pengaturan-simpan':
+        AdminSettings::update();
+        break;
+
+    // ── Audit Log (Activity Trail) ──────────────────────────
+    case 'audit':
+        AdminAuditLog::index();
+        break;
+    case 'audit-detail':
+        AdminAuditLog::detail((int) ($_GET['id'] ?? 0));
+        break;
+    case 'audit-export':
+        AdminAuditLog::export();
+        break;
+    case 'audit-hapus':
+        AdminAuditLog::destroy();
+        break;
+
+    // ── Manajemen Pengguna (khusus Super Admin) ───────────────
+    case 'users':
+        AdminUser::index();
+        break;
+    case 'users-tambah':
+        AdminUser::create();
+        break;
+    case 'users-simpan':
+        AdminUser::store();
+        break;
+    case 'users-edit':
+        AdminUser::edit((int) ($_GET['id'] ?? 0));
+        break;
+    case 'users-update':
+        AdminUser::update();
+        break;
+    case 'users-toggle':
+        AdminUser::toggle();
+        break;
+    case 'users-reset':
+        AdminUser::reset();
+        break;
+    case 'users-hapus':
+        AdminUser::destroy();
+        break;
+
+    // ── 404 Fallback ──────────────────────────────────────────
     default:
         http_response_code(404);
-        echo '<h1>404</h1><p>Halaman admin tidak ditemukan.</p>';
+        View::render('admin/errors/404', [
+            'title' => '404 | Tidak Ditemukan',
+            'page'  => $page,
+        ], 'layouts/admin');
         break;
 }

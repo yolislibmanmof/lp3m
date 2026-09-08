@@ -24,6 +24,8 @@ session_name('LP3M_SESSION');
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+// Zona waktu lembaga (WITA) — berlaku global untuk semua halaman
+date_default_timezone_set('Asia/Makassar');
 
 // ============================================
 // CORE — load dulu supaya helper & class dasar siap
@@ -34,7 +36,7 @@ require BASE_PATH . '/app/Core/Auth.php';
 require BASE_PATH . '/app/Core/Csrf.php';
 require BASE_PATH . '/app/Core/Upload.php';
 require BASE_PATH . '/app/Core/Crud.php';
-require BASE_PATH . '/app/Core/TextExtractor.php'; // ⚡ Mesin extract PDF/DOCX
+require BASE_PATH . '/app/Core/TextExtractor.php';
 
 // ============================================
 // MODELS
@@ -57,6 +59,8 @@ require BASE_PATH . '/app/Models/Reviewer.php';
 require BASE_PATH . '/app/Models/CalendarEvent.php';
 require BASE_PATH . '/app/Models/Notification.php';
 require BASE_PATH . '/app/Models/PlagiarismCheck.php';
+require BASE_PATH . '/app/Models/User.php';
+require BASE_PATH . '/app/Models/AuditLog.php';
 
 // ============================================
 // CONTROLLERS
@@ -84,6 +88,9 @@ require BASE_PATH . '/app/Controllers/AdminNotification.php';
 require BASE_PATH . '/app/Controllers/AdminPlagiarism.php';
 require BASE_PATH . '/app/Controllers/PublicEvent.php';
 require BASE_PATH . '/app/Controllers/PublicPlagiarism.php';
+require BASE_PATH . '/app/Controllers/AdminDashboard.php';
+require BASE_PATH . '/app/Controllers/AdminUser.php';
+require BASE_PATH . '/app/Controllers/AdminAuditLog.php';
 
 // ============================================
 // GLOBAL HELPERS

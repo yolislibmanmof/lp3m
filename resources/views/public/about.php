@@ -636,7 +636,7 @@ $totalKarya = $statPengabdian + $statPublikasi + $statHaki + $statAik + $statBer
     <div class="hero-orb hero-orb-3"></div>
 
     <span class="hero-chip c1" style="z-index: 2;">🏛️ Profil Lembaga</span>
-    <span class="hero-chip c2" style="z-index: 2;">✦ LP3M UNIMOF</span>
+    <span class="hero-chip c2" style="z-index: 2;">✦ LP3M</span>
 
     <span class="eyebrow eyebrow-light" style="z-index: 2;">Profil Lembaga</span>
     <h1 style="z-index: 2;"><?= e($s['about_hero_title']) ?></h1>
@@ -669,7 +669,7 @@ $totalKarya = $statPengabdian + $statPublikasi + $statHaki + $statAik + $statBer
                     <?= $aboutQuote[0] ?>
                 </p>
                 <p style="font-size: 12px; opacity: 0.7; letter-spacing: 0.1em;">
-                    ✦ MENJIWAI SETIAP LANGKAH LP3M/LPPAIK UNIMOF
+                    ✦ MENJIWAI SETIAP LANGKAH LP3M
                 </p>
             </div>
         </div>

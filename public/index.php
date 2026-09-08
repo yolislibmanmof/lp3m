@@ -129,6 +129,12 @@ switch ($page) {
 
     case 'cek-plagiat-lengkapi': PublicPlagiarism::completeWithText(); break;
 
+    case 'panduan':
+    View::render('public/panduan/index', [
+        'title' => 'Panduan Layanan | ' . APP_NAME,
+    ]);
+    break;
+
     default:
         http_response_code(404);
         echo '<h1>404</h1><p>Halaman tidak ditemukan.</p>';
