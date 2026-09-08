@@ -1,0 +1,18 @@
+# ==========================================
+# LP3M UNIMOF - Root .htaccess
+# Letak: C:\laragon\www\lp3m\.htaccess
+# ==========================================
+
+# Matikan listing folder (biar isi folder tidak kelihatan)
+Options -Indexes
+
+# Kalau orang buka http://localhost/lp3m/ langsung ke halaman public
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^$ public/index.php [L]
+</IfModule>
+
+# Blokir akses langsung ke file sensitif
+<FilesMatch "\.(sql|log|ini|md)$">
+    Require all denied
+</FilesMatch>
