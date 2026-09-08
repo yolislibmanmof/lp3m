@@ -117,6 +117,18 @@ switch ($page) {
         ], 'layouts/print');
         break;
 
+    case 'agenda': PublicEvent::index(); break;
+
+    case 'cek-plagiat':
+        PublicPlagiarism::index();
+        break;
+
+    case 'cek-plagiat-kirim':
+        PublicPlagiarism::submit();
+        break;
+
+    case 'cek-plagiat-lengkapi': PublicPlagiarism::completeWithText(); break;
+
     default:
         http_response_code(404);
         echo '<h1>404</h1><p>Halaman tidak ditemukan.</p>';

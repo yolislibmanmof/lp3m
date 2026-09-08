@@ -20,26 +20,12 @@
                 radial-gradient(360px 220px at 115% 18%, rgba(16,185,129,.10), transparent 60%),
                 linear-gradient(180deg, #082b21 0%, #052018 55%, #031510 100%);
         }
-
         @keyframes sb2Shine { 0%, 55% { left: -90%; } 100% { left: 165%; } }
         @keyframes sb2Spin { to { transform: rotate(360deg); } }
         @keyframes sb2Breath { 0%,100% { box-shadow: 0 0 0 0 rgba(16,185,129,.25); } 50% { box-shadow: 0 0 0 5px rgba(16,185,129,0); } }
 
-        .sb2-brand {
-            position: relative; z-index: 2;
-            display: flex; align-items: center; gap: 12px;
-            padding: 2px 6px 16px; margin-bottom: 12px;
-            border-bottom: 1px solid rgba(217,164,65,.14);
-            flex-shrink: 0;
-        }
-        .sb2-logo {
-            width: 46px; height: 46px; border-radius: 14px;
-            display: flex; align-items: center; justify-content: center;
-            font-family: var(--font-display); font-weight: 900; font-size: 17px; color: #03251f;
-            background: radial-gradient(circle at 30% 25%, #fff7c2 0%, #fde68a 18%, #f2c063 52%, #d9a441 100%);
-            box-shadow: inset 0 2px 3px rgba(255,255,255,.72), inset 0 -3px 4px rgba(0,0,0,.20), 0 6px 16px rgba(217,164,65,.45);
-            position: relative; flex-shrink: 0; overflow: hidden;
-        }
+        .sb2-brand { position: relative; z-index: 2; display: flex; align-items: center; gap: 12px; padding: 2px 6px 16px; margin-bottom: 12px; border-bottom: 1px solid rgba(217,164,65,.14); flex-shrink: 0; }
+        .sb2-logo { width: 46px; height: 46px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 900; font-size: 17px; color: #03251f; background: radial-gradient(circle at 30% 25%, #fff7c2 0%, #fde68a 18%, #f2c063 52%, #d9a441 100%); box-shadow: inset 0 2px 3px rgba(255,255,255,.72), inset 0 -3px 4px rgba(0,0,0,.20), 0 6px 16px rgba(217,164,65,.45); position: relative; flex-shrink: 0; overflow: hidden; }
         .sb2-logo::before { content:''; position:absolute; top:6px; left:10px; width:15px; height:6px; border-radius:50%; background:rgba(255,255,255,.70); filter:blur(1.5px); }
         .sb2-logo::after { content:''; position:absolute; top:0; left:-90%; width:52%; height:100%; background:linear-gradient(105deg, transparent, rgba(255,255,255,.72), transparent); transform:skewX(-20deg); animation:sb2Shine 3.4s ease-in-out infinite; }
         .sb2-brand-title { flex: 1; min-width: 0; }
@@ -72,6 +58,10 @@
         .sb2-online-dot { width: 9px; height: 9px; flex-shrink: 0; animation: sb2Breath 2s ease-in-out infinite; }
         .sb2-footer-mini { flex-shrink: 0; margin-top: 8px; text-align: center; font-size: 8.5px; color: rgba(255,255,255,.34); letter-spacing: .12em; text-transform: uppercase; position: relative; z-index: 2; }
 
+        /* Notif badge pulsing */
+        .bell-3d.live .bell-badge-3d { animation: bellPop 1.2s ease-in-out infinite alternate; }
+        @keyframes bellPop { from { transform: scale(1); } to { transform: scale(1.15); } }
+
         @media (max-width: 900px) {
             .sb2 { overflow: visible !important; padding: 14px !important; }
             .sb2-brand { margin-bottom: 10px; padding-bottom: 12px; }
@@ -88,7 +78,7 @@
 
 <?php
 // --- FIX ZONA WAKTU & LOGIKA GREETING ---
-date_default_timezone_set('Asia/Makassar'); 
+date_default_timezone_set('Asia/Makassar');
 
 $bulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 $tanggal = date('d') . ' ' . $bulan[(int) date('n') - 1] . ' ' . date('Y');
@@ -102,7 +92,7 @@ else                               { $greeting = 'Selamat Malam';   $greetIcon =
 // --- DATABASE CONNECTION ---
 $db = Database::pdo();
 
-// --- COUNTERS ---
+// --- COUNTERS MODUL EXISTING ---
 $cntBerita     = (int) $db->query('SELECT COUNT(*) FROM news')->fetchColumn();
 $cntDokumen    = (int) $db->query('SELECT COUNT(*) FROM documents')->fetchColumn();
 $cntPengabdian = (int) $db->query('SELECT COUNT(*) FROM community_services')->fetchColumn();
@@ -115,11 +105,20 @@ $cntFaq        = (int) $db->query('SELECT COUNT(*) FROM faqs')->fetchColumn();
 $cntGaleri     = (int) $db->query('SELECT COUNT(*) FROM galleries')->fetchColumn();
 $cntSertifikat = (int) $db->query('SELECT COUNT(*) FROM certificates')->fetchColumn();
 
+// --- COUNTERS MODUL BARU (Reviewer, Kalender, Cek Plagiat) ---
+$cntReviewers  = (int) $db->query('SELECT COUNT(*) FROM reviewers')->fetchColumn();
+$cntEvents     = (int) $db->query("SELECT COUNT(*) FROM events WHERE status='published'")->fetchColumn();
+$cntPlagiarism = (int) $db->query('SELECT COUNT(*) FROM plagiarism_checks')->fetchColumn();
+
+// --- UNREAD NOTIFICATIONS ---
+$adminId = (int) (Auth::user()['id'] ?? 0);
+$unreadNotif = (int) $db->query("SELECT COUNT(*) FROM notifications WHERE is_read = 0 AND (is_global = 1 OR user_id = " . $adminId . ")")->fetchColumn();
+
 $draftBerita = (int) $db->query('SELECT COUNT(*) FROM news WHERE status = "draft"')->fetchColumn();
 $draftDok    = (int) $db->query('SELECT COUNT(*) FROM documents WHERE status = "draft"')->fetchColumn();
 
 $totalDraft = $draftBerita + $draftDok;
-$totalAll   = $cntBerita + $cntDokumen + $cntPengabdian + $cntPublikasi + $cntHaki + $cntAik + $cntPenelitian + $cntHibah + $cntFaq + $cntGaleri + $cntSertifikat;
+$totalAll   = $cntBerita + $cntDokumen + $cntPengabdian + $cntPublikasi + $cntHaki + $cntAik + $cntPenelitian + $cntHibah + $cntFaq + $cntGaleri + $cntSertifikat + $cntReviewers + $cntEvents + $cntPlagiarism;
 
 // --- ADMIN INFO ---
 $adminName = Auth::user()['name'] ?? 'Admin';
@@ -127,9 +126,7 @@ $adminRole = Auth::user()['role'] ?? 'admin';
 
 $nameParts = explode(' ', trim($adminName));
 $initial = strtoupper(substr($nameParts[0] ?? 'A', 0, 1));
-if (isset($nameParts[1])) {
-    $initial .= strtoupper(substr($nameParts[1], 0, 1));
-}
+if (isset($nameParts[1])) $initial .= strtoupper(substr($nameParts[1], 0, 1));
 
 $roleMap = [
     'super_admin' => ['label' => 'Super Admin', 'rgb' => '217,164,65',  'hex' => '#f2c063'],
@@ -158,6 +155,13 @@ $pageTitles = [
     'hibah'       => 'Manajemen hibah & pendanaan',
     'kontak'      => 'Kontak & FAQ publik',
     'pengaturan'  => 'Konfigurasi tampilan publik',
+    'sertifikat'  => 'Sertifikat digital & verifikasi',
+    // MODUL BARU
+    'reviewers'   => 'Database reviewer internal & eksternal',
+    'events'      => 'Kalender kegiatan LP3M',
+    'plagiarism'  => 'Cek similaritas & plagiarisme',
+    'notifikasi'  => 'Pusat notifikasi sistem',
+    'agenda'      => 'Agenda publik kegiatan',
 ];
 
 $pageSub = $pageTitles[$currentPage] ?? '';
@@ -170,7 +174,7 @@ $firstName = explode(' ', trim($adminName))[0] ?? 'Admin';
          SIDEBAR FINAL PREMIUM
          ========================================================== -->
     <aside class="sidebar sb2" style="display:flex; flex-direction:column; overflow:hidden;">
-        <div class="sb-wm" aria-hidden="true">LP3M UNIGO</div>
+        <div class="sb-wm" aria-hidden="true">LP3M</div>
 
         <!-- Brand -->
         <div class="sb2-brand">
@@ -178,7 +182,7 @@ $firstName = explode(' ', trim($adminName))[0] ?? 'Admin';
                 <span style="position:relative; z-index:1;">LP</span>
             </div>
             <div class="sb2-brand-title">
-                <div class="brand-3d" style="font-size:16px; line-height:1.1;">LP3M UNIGO</div>
+                <div class="brand-3d" style="font-size:16px; line-height:1.1;">LP3M UNIMOF</div>
                 <div class="sb2-brand-sub">Elevate Command Center</div>
             </div>
             <span class="sb2-ver">v4.0</span>
@@ -198,13 +202,11 @@ $firstName = explode(' ', trim($adminName))[0] ?? 'Admin';
                 <span>Berita & Pengumuman</span>
                 <span class="jewel-badge jewel-gold"><?= $cntBerita ?></span>
             </a>
-
             <a href="<?= e(url('admin/index.php?page=dokumen')) ?>" class="<?= $currentPage === 'dokumen' ? 'active' : '' ?>">
                 <span class="ico-3d ico-3d-gold">📁</span>
                 <span>Dokumen & Unduhan</span>
                 <span class="jewel-badge jewel-gold"><?= $cntDokumen ?></span>
             </a>
-
             <a href="<?= e(url('admin/index.php?page=galeri')) ?>" class="<?= $currentPage === 'galeri' ? 'active' : '' ?>">
                 <span class="ico-3d ico-3d-purple">🖼️</span>
                 <span>Galeri Kegiatan</span>
@@ -217,25 +219,21 @@ $firstName = explode(' ', trim($adminName))[0] ?? 'Admin';
                 <span>Penelitian</span>
                 <span class="jewel-badge jewel-emerald"><?= $cntPenelitian ?></span>
             </a>
-
             <a href="<?= e(url('admin/index.php?page=pengabdian')) ?>" class="<?= $currentPage === 'pengabdian' ? 'active' : '' ?>">
                 <span class="ico-3d ico-3d-emerald">🤝</span>
                 <span>Pengabdian & KKN</span>
                 <span class="jewel-badge jewel-emerald"><?= $cntPengabdian ?></span>
             </a>
-
             <a href="<?= e(url('admin/index.php?page=publikasi')) ?>" class="<?= $currentPage === 'publikasi' ? 'active' : '' ?>">
                 <span class="ico-3d ico-3d-emerald">📚</span>
                 <span>Publikasi Ilmiah</span>
                 <span class="jewel-badge jewel-emerald"><?= $cntPublikasi ?></span>
             </a>
-
             <a href="<?= e(url('admin/index.php?page=haki')) ?>" class="<?= $currentPage === 'haki' ? 'active' : '' ?>">
                 <span class="ico-3d ico-3d-emerald">🛡️</span>
                 <span>HAKI</span>
                 <span class="jewel-badge jewel-emerald"><?= $cntHaki ?></span>
             </a>
-
             <a href="<?= e(url('admin/index.php?page=aik')) ?>" class="<?= $currentPage === 'aik' ? 'active' : '' ?>">
                 <span class="ico-3d ico-3d-emerald">🕌</span>
                 <span>AIK & Catur Dharma</span>
@@ -248,17 +246,37 @@ $firstName = explode(' ', trim($adminName))[0] ?? 'Admin';
                 <span>Hibah & Pendanaan</span>
                 <span class="jewel-badge jewel-gold"><?= $cntHibah ?></span>
             </a>
-
             <a href="<?= e(url('admin/index.php?page=sertifikat')) ?>" class="<?= $currentPage === 'sertifikat' ? 'active' : '' ?>">
                 <span class="ico-3d ico-3d-gold">🎓</span>
                 <span>Sertifikat & Verifikasi</span>
                 <span class="jewel-badge jewel-gold"><?= $cntSertifikat ?></span>
             </a>
-
             <a href="<?= e(url('admin/index.php?page=kontak')) ?>" class="<?= $currentPage === 'kontak' ? 'active' : '' ?>">
                 <span class="ico-3d ico-3d-blue">📞</span>
                 <span>Kontak & FAQ</span>
                 <span class="jewel-badge jewel-gold"><?= $cntFaq ?></span>
+            </a>
+
+            <span class="menu-label-3d">Layanan Cerdas ✦</span>
+            <a href="<?= e(url('admin/index.php?page=reviewers')) ?>" class="<?= $currentPage === 'reviewers' ? 'active' : '' ?>">
+                <span class="ico-3d ico-3d-blue">👥</span>
+                <span>Reviewer</span>
+                <span class="jewel-badge jewel-emerald"><?= $cntReviewers ?></span>
+            </a>
+            <a href="<?= e(url('admin/index.php?page=events')) ?>" class="<?= $currentPage === 'events' ? 'active' : '' ?>">
+                <span class="ico-3d ico-3d-gold">📅</span>
+                <span>Kalender Kegiatan</span>
+                <span class="jewel-badge jewel-gold"><?= $cntEvents ?></span>
+            </a>
+            <a href="<?= e(url('admin/index.php?page=plagiarism')) ?>" class="<?= $currentPage === 'plagiarism' ? 'active' : '' ?>">
+                <span class="ico-3d ico-3d-emerald">🔍</span>
+                <span>Cek Plagiat</span>
+                <span class="jewel-badge jewel-emerald"><?= $cntPlagiarism ?></span>
+            </a>
+            <a href="<?= e(url('admin/index.php?page=notifikasi')) ?>" class="<?= $currentPage === 'notifikasi' ? 'active' : '' ?>">
+                <span class="ico-3d ico-3d-gold">🔔</span>
+                <span>Notifikasi</span>
+                <?php if ($unreadNotif > 0): ?><span class="jewel-badge" style="background:linear-gradient(145deg,#f87171,#dc2626);color:#fff;"><?= $unreadNotif ?></span><?php endif; ?>
             </a>
 
             <span class="menu-label-3d">Sistem</span>
@@ -266,13 +284,11 @@ $firstName = explode(' ', trim($adminName))[0] ?? 'Admin';
                 <span class="ico-3d">⚙️</span>
                 <span>Pengaturan Website</span>
             </a>
-
             <a href="<?= e(url('public/index.php?page=home')) ?>" target="_blank">
                 <span class="ico-3d">🌐</span>
                 <span>Lihat Website</span>
                 <span style="margin-left:auto; font-size:10px; opacity:.5;">↗</span>
             </a>
-
             <a href="<?= e(url('admin/index.php?page=logout')) ?>" style="color:#fca5a5;">
                 <span class="ico-3d ico-3d-red">🚪</span>
                 <span>Logout</span>
@@ -331,7 +347,7 @@ $firstName = explode(' ', trim($adminName))[0] ?? 'Admin';
 
             <div class="topbar-right">
                 <div style="display:flex; gap:6px; padding:4px 8px; border-radius:12px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06);">
-                    <div style="display:flex; align-items:center; gap:6px; padding:4px 9px; border-radius:8px; background:rgba(242,192,99,.08);" title="Total data">
+                    <div style="display:flex; align-items:center; gap:6px; padding:4px 9px; border-radius:8px; background:rgba(242,192,99,.08);" title="Total data semua modul">
                         <span style="font-size:11px;">📊</span>
                         <span style="font-size:12px; font-weight:800; color:#f2c063; font-family:var(--font-display);"><?= number_format($totalAll) ?></span>
                     </div>
@@ -343,12 +359,10 @@ $firstName = explode(' ', trim($adminName))[0] ?? 'Admin';
                     <?php endif; ?>
                 </div>
 
-                <?php if ($totalDraft > 0): ?>
-                <a href="<?= e(url('admin/index.php?page=berita')) ?>" class="bell-3d" title="<?= $totalDraft ?> draft menunggu">
+                <a href="<?= e(url('admin/index.php?page=notifikasi')) ?>" class="bell-3d <?= $unreadNotif > 0 ? 'live' : '' ?>" title="<?= $unreadNotif ?> notifikasi belum dibaca">
                     <span class="bell-icon-inner" style="position:relative; z-index:1;">🔔</span>
-                    <span class="bell-badge-3d"><?= $totalDraft ?></span>
+                    <?php if ($unreadNotif > 0): ?><span class="bell-badge-3d"><?= $unreadNotif > 99 ? '99+' : $unreadNotif ?></span><?php endif; ?>
                 </a>
-                <?php endif; ?>
 
                 <span class="date-3d">📅 <?= e($tanggal) ?></span>
 
@@ -367,7 +381,7 @@ $firstName = explode(' ', trim($adminName))[0] ?? 'Admin';
 
             <footer style="margin-top:40px; padding:18px 0 4px; border-top:1px solid rgba(255,255,255,.06); display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; font-size:11px; color:rgba(255,255,255,.5);">
                 <div style="display:flex; align-items:center; gap:10px;">
-                    <span style="font-weight:800; background:linear-gradient(135deg,#fde68a,#d9a441); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;">LP3M UNIGO</span>
+                    <span style="font-weight:800; background:linear-gradient(135deg,#fde68a,#d9a441); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;">LP3M UNIMOF</span>
                     <span style="opacity:.5;">•</span>
                     <span>© <?= date('Y') ?> Elevate Edition</span>
                 </div>
@@ -383,14 +397,7 @@ $firstName = explode(' ', trim($adminName))[0] ?? 'Admin';
 </div>
 
 <?php else: ?>
-
-<!-- ==========================================================
-     LOGIN: render langsung view login (sudah self-contained).
-     JANGAN dibungkus .login-page/.login-box lagi di sini,
-     karena login.php sudah punya wrapper-nya sendiri.
-     ========================================================== -->
 <?= $content ?>
-
 <?php endif; ?>
 
 <script src="<?= e(url('admin/assets/js/admin.js')) ?>"></script>

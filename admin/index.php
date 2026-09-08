@@ -159,6 +159,36 @@ switch ($page) {
     case 'pengaturan':        AdminSettings::edit();   break;
     case 'pengaturan-simpan': AdminSettings::update(); break;
     
+    case 'reviewers': AdminReviewer::index(); break;
+case 'reviewers-tambah': AdminReviewer::create(); break;
+case 'reviewers-simpan': AdminReviewer::store(); break;
+case 'reviewers-edit': AdminReviewer::edit((int)($_GET['id'] ?? 0)); break;
+case 'reviewers-update': AdminReviewer::update(); break;
+case 'reviewers-hapus': AdminReviewer::destroy(); break;
+case 'reviewers-assign': AdminReviewer::assign(); break;
+case 'reviewers-selesai': AdminReviewer::complete(); break;
+case 'events': AdminEvent::index(); break;
+case 'events-tambah': AdminEvent::create(); break;
+case 'events-simpan': AdminEvent::store(); break;
+case 'events-edit': AdminEvent::edit((int)($_GET['id'] ?? 0)); break;
+case 'events-update': AdminEvent::update(); break;
+case 'events-hapus': AdminEvent::destroy(); break;
+case 'notifikasi': AdminNotification::index(); break;
+case 'notifikasi-baca': AdminNotification::markRead(); break;
+case 'notifikasi-baca-semua': AdminNotification::markAll(); break;
+case 'notifikasi-bulk-baca': AdminNotification::bulkMarkRead(); break;
+case 'notifikasi-hapus': AdminNotification::destroy(); break;
+case 'plagiarism': AdminPlagiarism::index(); break;
+case 'plagiarism-tambah': AdminPlagiarism::create(); break;
+case 'plagiarism-simpan': AdminPlagiarism::store(); break;
+case 'plagiarism-lihat': AdminPlagiarism::show((int)($_GET['id'] ?? 0)); break;
+case 'plagiarism-manual': AdminPlagiarism::manualScore(); break;
+case 'plagiarism-ekstrak': AdminPlagiarism::reextract(); break;
+case 'plagiarism-ulang': AdminPlagiarism::recheck(); break;
+case 'plagiarism-export': AdminPlagiarism::export(); break;
+case 'plagiarism-analisis': AdminPlagiarism::analyzeNow(); break;
+case 'plagiarism-hapus': AdminPlagiarism::destroy(); break;
+
     // ── 404 ─────────────────────────────────────────────
     default:
         http_response_code(404);

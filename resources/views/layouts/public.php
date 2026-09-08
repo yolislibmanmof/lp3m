@@ -15,15 +15,30 @@ $brand      = e($s['site_brand'] ?? 'LP3M');
 $footerText = trim((string)($s['footer_text'] ?? ''));
 
 if ($footerText === '') {
-    // Footer kosong → buat copyright default
     $footerLine = '&copy; ' . date('Y') . ' ' . $brand . '. All rights reserved.';
 } elseif (strpos($footerText, '©') !== false) {
-    // Teks footer SUDAH ada © → tampilkan apa adanya (TIDAK didobelkan)
     $footerLine = e($footerText);
 } else {
-    // Teks footer hanya tagline → tambahkan copyright di depan
     $footerLine = '&copy; ' . date('Y') . ' ' . $brand . '. ' . e($footerText);
 }
+
+// --- LIVE EVENT TICKER (dari modul Kalender Kegiatan) ---
+$upcomingCount = 0;
+$tickerEvents = [];
+try {
+    $db = Database::pdo();
+    $upcomingCount = (int) $db->query("SELECT COUNT(*) FROM events WHERE status='published' AND start_date >= CURDATE() AND start_date <= DATE_ADD(CURDATE(), INTERVAL 30 DAY)")->fetchColumn();
+    if ($upcomingCount > 0) {
+        $st = $db->query("SELECT title, start_date FROM events WHERE status='published' AND start_date >= CURDATE() ORDER BY start_date ASC LIMIT 3");
+        $tickerEvents = $st->fetchAll();
+    }
+} catch (\Throwable $e) { $upcomingCount = 0; }
+
+// --- PUBLIC PLAGIARISM COUNT (untuk badge di footer) ---
+$publicPlagCount = 0;
+try {
+    $publicPlagCount = (int) Database::pdo()->query("SELECT COUNT(*) FROM plagiarism_checks WHERE status='completed'")->fetchColumn();
+} catch (\Throwable $e) {}
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -56,6 +71,7 @@ if ($footerText === '') {
         @keyframes typingCaret { 0%,100% { border-color: transparent; } 50% { border-color: #f2c063; } }
         @keyframes confettiFall { to { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
         @keyframes dropdownFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes tickerScroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
         /* ==========================================================
            SPLASH SCREEN SINEMATIK
@@ -86,13 +102,11 @@ if ($footerText === '') {
         .brand::after { animation: brandPulse 3s ease-in-out infinite; }
         .site-logo { animation: logoFloat 4s ease-in-out infinite; }
         
-        /* FIX: Centering Navbar */
         .topbar-inner { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
         .brand { flex: 0 0 auto; }
-        #main-menu { flex: 1; display: flex; justify-content: center; } /* Pusatkan menu */
+        #main-menu { flex: 1; display: flex; justify-content: center; }
         .menu-toggle { flex: 0 0 auto; }
 
-        /* Animasi menu stagger */
         .menu > li { animation: navPop 0.55s cubic-bezier(0.16, 1, 0.3, 1) both; list-style: none; }
         .menu > li:nth-child(1) { animation-delay: 0.10s; }
         .menu > li:nth-child(2) { animation-delay: 0.16s; }
@@ -109,7 +123,6 @@ if ($footerText === '') {
         .nav-ico { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; min-width: 32px; min-height: 32px; border-radius: 9px; font-size: 15px; line-height: 1; flex-shrink: 0; transition: all 0.25s cubic-bezier(0.16,1,0.3,1); }
         .nav-ico svg { width: 18px; height: 18px; stroke-width: 2.2; }
 
-        /* --- DROPDOWN STYLES (FIXED HOVER TEXT COLOR) --- */
         .menu { display: flex; align-items: center; gap: 4px; flex-wrap: nowrap; padding: 0; margin: 0; }
         .has-dropdown { position: relative; }
         .dropdown-toggle { cursor: pointer; display: flex; align-items: center; gap: 6px; }
@@ -127,11 +140,9 @@ if ($footerText === '') {
         }
         .has-dropdown:hover .dropdown-menu { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
         
-        /* Mega Dropdown for Catur Dharma */
         .mega-dropdown { min-width: 480px; padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .mega-dropdown .dropdown-item { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 10px; transition: all 0.2s; text-decoration: none; color: var(--text); }
         
-        /* FIX: Hover Mega Dropdown -> Text Putih */
         .mega-dropdown .dropdown-item:hover { 
             background: linear-gradient(145deg, #10b981, #059669); 
             transform: translateX(4px); 
@@ -146,10 +157,8 @@ if ($footerText === '') {
         .mega-dropdown .item-text strong { display: block; font-size: 13px; font-weight: 700; color: var(--ink); transition: color 0.2s; }
         .mega-dropdown .item-text span { font-size: 11px; color: var(--muted); transition: color 0.2s; }
 
-        /* Simple Dropdown */
         .dropdown-menu .dropdown-link { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; color: var(--text); text-decoration: none; transition: all 0.2s; }
         
-        /* FIX: Hover Simple Dropdown -> Text Putih */
         .dropdown-menu .dropdown-link:hover { 
             background: linear-gradient(145deg, #10b981, #059669); 
             color: #ffffff !important; 
@@ -159,7 +168,15 @@ if ($footerText === '') {
         .dropdown-menu .dropdown-link:hover svg { stroke: white; opacity: 1; }
         .dropdown-menu .dropdown-link svg { width: 16px; height: 16px; opacity: 0.7; transition: all 0.2s; }
 
-        /* Mobile Dropdown Fix */
+        /* 🆕 LIVE EVENT TICKER di topbar */
+        .live-ticker { display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px; border-radius: 999px; background: linear-gradient(145deg, rgba(16,185,129,0.15), rgba(5,150,105,0.08)); border: 1px solid rgba(16,185,129,0.3); font-size: 11px; font-weight: 700; color: #065f46; margin-left: 10px; }
+        .live-ticker-dot { width: 7px; height: 7px; border-radius: 50%; background: #10b981; box-shadow: 0 0 0 0 rgba(16,185,129,0.6); animation: brandPulse 2s ease-in-out infinite; }
+        .live-ticker a { color: #065f46; text-decoration: none; font-weight: 800; }
+        .live-ticker a:hover { color: #d9a441; }
+
+        /* 🆕 BADGE di dropdown item (untuk count) */
+        .dropdown-item-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; border-radius: 999px; background: linear-gradient(145deg, #f2c063, #d9a441); color: #03251f; font-size: 9px; font-weight: 900; padding: 0 5px; margin-left: auto; }
+
         @media (max-width: 900px) {
             .topbar-inner { justify-content: space-between; }
             #main-menu { position: absolute; top: 70px; left: 0; width: 100%; justify-content: flex-start; z-index: 999; }
@@ -172,9 +189,9 @@ if ($footerText === '') {
             .dropdown-toggle::after { content: '+'; font-size: 16px; }
             .has-dropdown.active .dropdown-toggle::after { content: '-'; }
             
-            /* Mobile Hover Fix (tap active state) */
             .mega-dropdown .dropdown-item:active, .dropdown-menu .dropdown-link:active { background: #059669; color: white; }
             .mega-dropdown .dropdown-item:active .item-text strong, .mega-dropdown .dropdown-item:active .item-text span { color: white; }
+            .live-ticker { display: none; }
         }
 
         /* ==========================================================
@@ -222,10 +239,6 @@ if ($footerText === '') {
         @media (prefers-reduced-motion: reduce) { #splash { display: none; } #cursor-glow { display: none; } }
         @media print { #splash, #cursor-glow, .bg-orb, #scroll-progress, .back-to-top-jewel, .topbar { display: none !important; } body { background: white !important; } }
         
-        /* ==========================================================
-           FIX NAVBAR SERAGAM — hapus pill hijau & ikon gelap
-           pada Beranda / Berita / Login (efek selector :last-child)
-           ========================================================== */
         .menu a:last-child {
             margin-left: 0 !important;
             padding: 8px 12px !important;
@@ -246,12 +259,19 @@ if ($footerText === '') {
             border: 1px solid var(--border-soft) !important;
             box-shadow: inset 0 1px 1px rgba(255,255,255,0.8), 0 2px 4px rgba(3,37,31,0.08) !important;
         }
-        /* Menu aktif: tanpa pill, cukup underline gradient saja */
         .menu a.active {
             background: transparent !important;
             color: var(--primary-dark) !important;
             box-shadow: none !important;
         }
+
+        /* 🆕 FOOTER KOLOM LAYANAN CERDAS */
+        .ft-smart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; }
+        .ft-smart-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); text-decoration: none; color: rgba(255,255,255,0.9); transition: all 0.25s; font-size: 13px; }
+        .ft-smart-item:hover { background: rgba(217,164,65,0.12); border-color: rgba(217,164,65,0.35); transform: translateX(4px); color: #f2c063; }
+        .ft-smart-item .ft-smart-ico { font-size: 18px; flex-shrink: 0; }
+        .ft-smart-item strong { display: block; font-size: 12px; color: inherit; }
+        .ft-smart-item small { font-size: 10px; opacity: 0.65; }
     </style>
 </head>
 <body id="top">
@@ -280,8 +300,15 @@ $currentHijriMonth = $hijriMonths[((int) date('n') + 5) % 12];
             <?php endif; ?>
             <span><?= e($s['site_brand']) ?></span>
         </a>
+
+        <?php if ($upcomingCount > 0): ?>
+        <span class="live-ticker">
+            <span class="live-ticker-dot"></span>
+            <span><?= $upcomingCount ?> kegiatan 30 hari · </span>
+            <a href="<?= e(url('public/index.php?page=agenda')) ?>">Lihat agenda →</a>
+        </span>
+        <?php endif; ?>
         
-        <!-- MENU WRAPPER (untuk centering) -->
         <nav id="main-menu">
             <ul class="menu">
                 <!-- 1. Beranda -->
@@ -301,7 +328,7 @@ $currentHijriMonth = $hijriMonths[((int) date('n') + 5) % 12];
                 <!-- 3. Berita -->
                 <li><a href="<?= e(url('public/index.php?page=berita')) ?>"><span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"></path><path d="M18 14h-8"></path><path d="M15 18h-5"></path><path d="M10 6h8v4h-8V6Z"></path></svg></span>Berita</a></li>
 
-                <!-- 4. Galeri (MENU UTAMA TERSENDIRI) -->
+                <!-- 4. Galeri -->
                 <li><a href="<?= e(url('public/index.php?page=galeri')) ?>"><span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg></span>Galeri</a></li>
 
                 <!-- 5. Catur Dharma (Mega Dropdown) -->
@@ -327,13 +354,23 @@ $currentHijriMonth = $hijriMonths[((int) date('n') + 5) % 12];
                     </div>
                 </li>
 
-                <!-- 6. Layanan (Dropdown) -->
+                <!-- 6. Layanan (Dropdown) — 🆕 TAMBAH AGENDA & CEK PLAGIAT -->
                 <li class="has-dropdown">
                     <a href="#" class="dropdown-toggle"><span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></span>Layanan</a>
                     <div class="dropdown-menu">
+                        <a href="<?= e(url('public/index.php?page=agenda')) ?>" class="dropdown-link">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                            Agenda Kegiatan
+                            <?php if ($upcomingCount > 0): ?><span class="dropdown-item-badge"><?= $upcomingCount ?></span><?php endif; ?>
+                        </a>
                         <a href="<?= e(url('public/index.php?page=unduhan')) ?>" class="dropdown-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg> Unduhan Dokumen</a>
                         <a href="<?= e(url('public/index.php?page=hibah')) ?>" class="dropdown-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> Hibah Aktif</a>
                         <a href="<?= e(url('public/index.php?page=verifikasi-sertifikat')) ?>" class="dropdown-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 15a7 7 0 1 0 0-14 7 7 0 0 0 0 14Z"></path><path d="M8.2 13.9 7 23l5-3 5 3-1.2-9.1"></path></svg> Verifikasi Sertifikat</a>
+                        <a href="<?= e(url('public/index.php?page=cek-plagiat')) ?>" class="dropdown-link">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><path d="M8 11h6"></path><path d="M11 8v6"></path></svg>
+                            Cek Plagiarisme
+                            <?php if ($publicPlagCount > 0): ?><span class="dropdown-item-badge"><?= $publicPlagCount ?></span><?php endif; ?>
+                        </a>
                     </div>
                 </li>
 
@@ -369,7 +406,7 @@ $currentHijriMonth = $hijriMonths[((int) date('n') + 5) % 12];
                 </div>
                 <p style="font-size: 13.5px; line-height: 1.75; color: rgba(255,255,255,0.78); margin-bottom: 18px;">
                     Lembaga Penelitian, Pengabdian kepada Masyarakat, dan Al-Islam Kemuhammadiyahan
-                    <strong style="color: #f2c063;">Universitas Muhammadiyah Gorontalo</strong>.
+                    <strong style="color: #f2c063;">Universitas Muhammadiyah Maumere</strong>.
                 </p>
                 <p style="font-size: 11px; font-weight: 800; letter-spacing: 0.18em; color: #f2c063; margin-bottom: 10px;">IKUTI KAMI</p>
                 <div style="display: flex; gap: 10px;" id="soc-row">
@@ -387,17 +424,41 @@ $currentHijriMonth = $hijriMonths[((int) date('n') + 5) % 12];
                     <li><a class="ft-link" href="<?= e(url('public/index.php?page=tentang')) ?>">Tentang Kami</a></li>
                     <li><a class="ft-link" href="<?= e(url('public/index.php?page=berita')) ?>">Berita</a></li>
                     <li><a class="ft-link" href="<?= e(url('public/index.php?page=unduhan')) ?>">Dokumen</a></li>
+                    <li><a class="ft-link" href="<?= e(url('public/index.php?page=galeri')) ?>">Galeri</a></li>
                 </ul>
             </div>
 
             <div>
                 <h4 class="ft-hd">CATUR DHARMA</h4>
                 <ul style="list-style: none; display: flex; flex-direction: column; gap: 2px;">
+                    <li><a class="ft-link" href="<?= e(url('public/index.php?page=penelitian')) ?>">🔬 Penelitian</a></li>
                     <li><a class="ft-link" href="<?= e(url('public/index.php?page=pengabdian')) ?>">🤝 Pengabdian</a></li>
                     <li><a class="ft-link" href="<?= e(url('public/index.php?page=publikasi')) ?>">📚 Publikasi</a></li>
-                    <li><a class="ft-link" href="<?= e(url('public/index.php?page=publikasi')) ?>">🛡️ HAKI</a></li>
+                    <li><a class="ft-link" href="<?= e(url('public/index.php?page=haki')) ?>">🛡️ HAKI</a></li>
                     <li><a class="ft-link" href="<?= e(url('public/index.php?page=aik')) ?>">🕌 AIK</a></li>
                 </ul>
+            </div>
+
+            <div>
+                <h4 class="ft-hd">LAYANAN CERDAS ✦</h4>
+                <div class="ft-smart-grid">
+                    <a href="<?= e(url('public/index.php?page=agenda')) ?>" class="ft-smart-item">
+                        <span class="ft-smart-ico">📅</span>
+                        <div><strong>Agenda</strong><small><?= $upcomingCount ?> kegiatan</small></div>
+                    </a>
+                    <a href="<?= e(url('public/index.php?page=verifikasi-sertifikat')) ?>" class="ft-smart-item">
+                        <span class="ft-smart-ico">🎓</span>
+                        <div><strong>Sertifikat</strong><small>Verifikasi online</small></div>
+                    </a>
+                    <a href="<?= e(url('public/index.php?page=cek-plagiat')) ?>" class="ft-smart-item">
+                        <span class="ft-smart-ico">🔍</span>
+                        <div><strong>Cek Plagiat</strong><small><?= $publicPlagCount ?> laporan</small></div>
+                    </a>
+                    <a href="<?= e(url('public/index.php?page=hibah')) ?>" class="ft-smart-item">
+                        <span class="ft-smart-ico">💰</span>
+                        <div><strong>Hibah</strong><small>Pendanaan riset</small></div>
+                    </a>
+                </div>
             </div>
 
             <div>
@@ -470,7 +531,6 @@ $currentHijriMonth = $hijriMonths[((int) date('n') + 5) % 12];
             toggleBtn.innerHTML = menu.classList.contains('show') ? '✕' : '☰';
         });
         
-        // Accordion for mobile dropdowns
         document.querySelectorAll('.has-dropdown > .dropdown-toggle').forEach(function(toggle) {
             toggle.addEventListener('click', function(e) {
                 if (window.innerWidth <= 900) {

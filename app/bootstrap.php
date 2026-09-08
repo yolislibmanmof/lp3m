@@ -5,7 +5,7 @@ declare(strict_types=1);
 define('BASE_PATH', dirname(__DIR__));
 
 $config = require BASE_PATH . '/config/config.php';
-$GLOBALS['config'] = $config;   // ← supaya Database & helper bisa akses config
+$GLOBALS['config'] = $config;
 
 define('BASE_URL', rtrim($config['base_url'], '/'));
 define('APP_NAME', $config['app_name']);
@@ -25,15 +25,20 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// --- Core ---
+// ============================================
+// CORE — load dulu supaya helper & class dasar siap
+// ============================================
 require BASE_PATH . '/app/Core/Database.php';
 require BASE_PATH . '/app/Core/View.php';
 require BASE_PATH . '/app/Core/Auth.php';
 require BASE_PATH . '/app/Core/Csrf.php';
 require BASE_PATH . '/app/Core/Upload.php';
 require BASE_PATH . '/app/Core/Crud.php';
+require BASE_PATH . '/app/Core/TextExtractor.php'; // ⚡ Mesin extract PDF/DOCX
 
-// --- Models ---
+// ============================================
+// MODELS
+// ============================================
 require BASE_PATH . '/app/Models/News.php';
 require BASE_PATH . '/app/Models/Setting.php';
 require BASE_PATH . '/app/Models/Document.php';
@@ -43,13 +48,19 @@ require BASE_PATH . '/app/Models/IntellectualProperty.php';
 require BASE_PATH . '/app/Models/AikActivity.php';
 require BASE_PATH . '/app/Models/Research.php';
 require BASE_PATH . '/app/Models/Grant.php';
-require BASE_PATH . '/app/Models/Faq.php';          
+require BASE_PATH . '/app/Models/Faq.php';
 require BASE_PATH . '/app/Models/ContactInfo.php';
 require BASE_PATH . '/app/Models/Gallery.php';
 require BASE_PATH . '/app/Models/Tag.php';
 require BASE_PATH . '/app/Models/Certificate.php';
+require BASE_PATH . '/app/Models/Reviewer.php';
+require BASE_PATH . '/app/Models/CalendarEvent.php';
+require BASE_PATH . '/app/Models/Notification.php';
+require BASE_PATH . '/app/Models/PlagiarismCheck.php';
 
-// --- Controllers ---
+// ============================================
+// CONTROLLERS
+// ============================================
 require BASE_PATH . '/app/Controllers/PublicNews.php';
 require BASE_PATH . '/app/Controllers/AdminNews.php';
 require BASE_PATH . '/app/Controllers/AdminSettings.php';
@@ -67,8 +78,16 @@ require BASE_PATH . '/app/Controllers/PublicResearch.php';
 require BASE_PATH . '/app/Controllers/AdminGallery.php';
 require BASE_PATH . '/app/Controllers/PublicCommunity.php';
 require BASE_PATH . '/app/Controllers/AdminCertificate.php';
+require BASE_PATH . '/app/Controllers/AdminReviewer.php';
+require BASE_PATH . '/app/Controllers/AdminEvent.php';
+require BASE_PATH . '/app/Controllers/AdminNotification.php';
+require BASE_PATH . '/app/Controllers/AdminPlagiarism.php';
+require BASE_PATH . '/app/Controllers/PublicEvent.php';
+require BASE_PATH . '/app/Controllers/PublicPlagiarism.php';
 
-// --- Global Helpers ---
+// ============================================
+// GLOBAL HELPERS
+// ============================================
 function e($value): string
 {
     return htmlspecialchars((string)($value ?? ''), ENT_QUOTES, 'UTF-8');
@@ -93,7 +112,6 @@ function redirect(string $url): void
 function old(string $key, string $default = ''): string
 {
     $value = $_POST[$key] ?? $_SESSION['old'][$key] ?? $default;
-
     return is_scalar($value) ? (string)$value : $default;
 }
 
@@ -104,33 +122,22 @@ function csrf_field(): string
 
 function upload_url(?string $path): string
 {
-    if (!$path) {
-        return '';
-    }
-
+    if (!$path) return '';
     return url('public/uploads/' . ltrim($path, '/'));
 }
 
 function excerpt(string $text, int $length = 140): string
 {
     $text = trim(preg_replace('/\s+/', ' ', strip_tags($text)));
-
     if (function_exists('mb_strimwidth')) {
         return mb_strimwidth($text, 0, $length, '...');
     }
-
     return strlen($text) > $length ? substr($text, 0, $length) . '...' : $text;
 }
 
 function format_bytes(int $bytes): string
 {
-    if ($bytes >= 1048576) {
-        return round($bytes / 1048576, 1) . ' MB';
-    }
-
-    if ($bytes >= 1024) {
-        return round($bytes / 1024, 1) . ' KB';
-    }
-
+    if ($bytes >= 1048576) return round($bytes / 1048576, 1) . ' MB';
+    if ($bytes >= 1024) return round($bytes / 1024, 1) . ' KB';
     return $bytes . ' B';
 }
