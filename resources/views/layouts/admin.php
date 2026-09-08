@@ -107,6 +107,7 @@ $cntReviewers  = (int) $db->query('SELECT COUNT(*) FROM reviewers')->fetchColumn
 $cntEvents     = (int) $db->query("SELECT COUNT(*) FROM events WHERE status='published'")->fetchColumn();
 $cntPlagiarism = (int) $db->query('SELECT COUNT(*) FROM plagiarism_checks')->fetchColumn();
 $cntUsers      = (int) $db->query('SELECT COUNT(*) FROM users')->fetchColumn();
+$cntSurvey     = (int) $db->query('SELECT COUNT(*) FROM surveys')->fetchColumn();
 
 $adminId     = (int) (Auth::user()['id'] ?? 0);
 $unreadNotif = (int) $db->query("SELECT COUNT(*) FROM notifications WHERE is_read = 0 AND (is_global = 1 OR user_id = " . $adminId . ")")->fetchColumn();
@@ -115,6 +116,10 @@ $draftBerita = (int) $db->query("SELECT COUNT(*) FROM news WHERE status = 'draft
 $draftDok    = (int) $db->query("SELECT COUNT(*) FROM documents WHERE status = 'draft'")->fetchColumn();
 $totalDraft  = $draftBerita + $draftDok;
 $totalAll    = $cntBerita + $cntDokumen + $cntPengabdian + $cntPublikasi + $cntHaki + $cntAik + $cntPenelitian + $cntHibah + $cntFaq + $cntGaleri + $cntSertifikat + $cntReviewers + $cntEvents + $cntPlagiarism;
+
+// --- MAINTENANCE STATUS ---
+$maintenanceOn = false;
+try { $maintenanceOn = Maintenance::isOn(); } catch (\Throwable $e) {}
 
 // --- ADMIN INFO ---
 $adminName = Auth::user()['name'] ?? 'Admin';
@@ -139,26 +144,39 @@ $uptimeHours = rand(120, 720);
 $currentPage = $_GET['page'] ?? 'dashboard';
 
 $pageTitles = [
-    'dashboard'   => 'Ringkasan performa lembaga',
-    'berita'      => 'Kelola publikasi redaksi',
-    'dokumen'     => 'Arsip & dokumen publik',
-    'galeri'      => 'Galeri kegiatan & dokumentasi',
-    'penelitian'  => 'Kelola penelitian & proposal',
-    'pengabdian'  => 'Program pengabdian masyarakat',
-    'publikasi'   => 'Jurnal & artikel ilmiah',
-    'haki'        => 'Hak kekayaan intelektual',
-    'aik'         => 'Al-Islam & Kemuhammadiyahan',
-    'hibah'       => 'Manajemen hibah & pendanaan',
-    'kontak'      => 'Kontak & FAQ publik',
-    'pengaturan'  => 'Konfigurasi tampilan publik',
-    'sertifikat'  => 'Sertifikat digital & verifikasi',
-    'reviewers'   => 'Database reviewer internal & eksternal',
-    'events'      => 'Kalender kegiatan LP3M',
-    'plagiarism'  => 'Cek similaritas & plagiarisme',
-    'notifikasi'  => 'Pusat notifikasi sistem',
-    'users'       => 'Manajemen pengguna & hak akses',
-    'users-tambah'=> 'Manajemen pengguna & hak akses',
-    'users-edit'  => 'Manajemen pengguna & hak akses',
+    'dashboard'       => 'Ringkasan performa lembaga',
+    'berita'          => 'Kelola publikasi redaksi',
+    'dokumen'         => 'Arsip & dokumen publik',
+    'galeri'          => 'Galeri kegiatan & dokumentasi',
+    'penelitian'      => 'Kelola penelitian & proposal',
+    'pengabdian'      => 'Program pengabdian masyarakat',
+    'publikasi'       => 'Jurnal & artikel ilmiah',
+    'haki'            => 'Hak kekayaan intelektual',
+    'aik'             => 'Al-Islam & Kemuhammadiyahan',
+    'hibah'           => 'Manajemen hibah & pendanaan',
+    'kontak'          => 'Kontak & FAQ publik',
+    'pengaturan'      => 'Konfigurasi tampilan publik',
+    'sertifikat'      => 'Sertifikat digital & verifikasi',
+    'reviewers'       => 'Database reviewer internal & eksternal',
+    'events'          => 'Kalender kegiatan LP3M',
+    'plagiarism'      => 'Cek similaritas & plagiarisme',
+    'notifikasi'      => 'Pusat notifikasi sistem',
+    'users'           => 'Manajemen pengguna & hak akses',
+    'users-tambah'    => 'Manajemen pengguna & hak akses',
+    'users-edit'      => 'Manajemen pengguna & hak akses',
+    'audit'           => 'Jejak aktivitas pengguna',
+    'audit-detail'    => 'Detail jejak aktivitas',
+    'laporan'         => 'Dashboard laporan & export',
+    'laporan-modul'   => 'Detail laporan per modul',
+    'laporan-print'   => 'Laporan cetak (PDF)',
+    'laporan-tahunan' => 'Laporan tahunan',
+    // 🆕 TAHAP G — Survei
+    'survei'          => 'Survei kepuasan & EDOM',
+    'survei-tambah'   => 'Buat survei baru',
+    'survei-edit'     => 'Edit survei',
+    'survei-hasil'    => 'Hasil survei & statistik',
+    // 🆕 TAHAP D — Backup & Maintenance
+    'backup'          => 'Backup database & mode perawatan',
 ];
 
 $pageSub   = $pageTitles[$currentPage] ?? '';
@@ -181,110 +199,118 @@ $firstName = explode(' ', trim($adminName))[0] ?? 'Admin';
             <span class="sb2-ver">v4.0</span>
         </div>
 
-<!-- Menu -->
-<nav class="sidebar-menu sb2-nav">
-    <span class="menu-label-3d">Utama</span>
-    <a href="<?= e(url('admin/index.php?page=dashboard')) ?>" class="<?= $currentPage === 'dashboard' ? 'active' : '' ?>">
-        <span class="ico-3d ico-3d-gold">🏠</span><span>Dashboard</span>
-    </a>
+        <!-- Menu -->
+        <nav class="sidebar-menu sb2-nav">
+            <span class="menu-label-3d">Utama</span>
+            <a href="<?= e(url('admin/index.php?page=dashboard')) ?>" class="<?= $currentPage === 'dashboard' ? 'active' : '' ?>">
+                <span class="ico-3d ico-3d-gold">🏠</span><span>Dashboard</span>
+            </a>
 
-    <span class="menu-label-3d">Konten</span>
-    <a href="<?= e(url('admin/index.php?page=berita')) ?>" class="<?= $currentPage === 'berita' ? 'active' : '' ?>">
-        <span class="ico-3d ico-3d-gold">📰</span><span>Berita & Pengumuman</span>
-        <span class="jewel-badge jewel-gold"><?= $cntBerita ?></span>
-    </a>
-    <a href="<?= e(url('admin/index.php?page=dokumen')) ?>" class="<?= $currentPage === 'dokumen' ? 'active' : '' ?>">
-        <span class="ico-3d ico-3d-gold">📁</span><span>Dokumen & Unduhan</span>
-        <span class="jewel-badge jewel-gold"><?= $cntDokumen ?></span>
-    </a>
-    <a href="<?= e(url('admin/index.php?page=galeri')) ?>" class="<?= $currentPage === 'galeri' ? 'active' : '' ?>">
-        <span class="ico-3d ico-3d-purple">🖼️</span><span>Galeri Kegiatan</span>
-        <span class="jewel-badge jewel-gold"><?= $cntGaleri ?></span>
-    </a>
+            <span class="menu-label-3d">Konten</span>
+            <a href="<?= e(url('admin/index.php?page=berita')) ?>" class="<?= $currentPage === 'berita' ? 'active' : '' ?>">
+                <span class="ico-3d ico-3d-gold">📰</span><span>Berita & Pengumuman</span>
+                <span class="jewel-badge jewel-gold"><?= $cntBerita ?></span>
+            </a>
+            <a href="<?= e(url('admin/index.php?page=dokumen')) ?>" class="<?= $currentPage === 'dokumen' ? 'active' : '' ?>">
+                <span class="ico-3d ico-3d-gold">📁</span><span>Dokumen & Unduhan</span>
+                <span class="jewel-badge jewel-gold"><?= $cntDokumen ?></span>
+            </a>
+            <a href="<?= e(url('admin/index.php?page=galeri')) ?>" class="<?= $currentPage === 'galeri' ? 'active' : '' ?>">
+                <span class="ico-3d ico-3d-purple">🖼️</span><span>Galeri Kegiatan</span>
+                <span class="jewel-badge jewel-gold"><?= $cntGaleri ?></span>
+            </a>
 
-    <span class="menu-label-3d">Catur Dharma</span>
-    <a href="<?= e(url('admin/index.php?page=penelitian')) ?>" class="<?= $currentPage === 'penelitian' ? 'active' : '' ?>">
-        <span class="ico-3d ico-3d-blue">🔬</span><span>Penelitian</span>
-        <span class="jewel-badge jewel-emerald"><?= $cntPenelitian ?></span>
-    </a>
-    <a href="<?= e(url('admin/index.php?page=pengabdian')) ?>" class="<?= $currentPage === 'pengabdian' ? 'active' : '' ?>">
-        <span class="ico-3d ico-3d-emerald">🤝</span><span>Pengabdian & KKN</span>
-        <span class="jewel-badge jewel-emerald"><?= $cntPengabdian ?></span>
-    </a>
-    <a href="<?= e(url('admin/index.php?page=publikasi')) ?>" class="<?= $currentPage === 'publikasi' ? 'active' : '' ?>">
-        <span class="ico-3d ico-3d-emerald">📚</span><span>Publikasi Ilmiah</span>
-        <span class="jewel-badge jewel-emerald"><?= $cntPublikasi ?></span>
-    </a>
-    <a href="<?= e(url('admin/index.php?page=haki')) ?>" class="<?= $currentPage === 'haki' ? 'active' : '' ?>">
-        <span class="ico-3d ico-3d-emerald">🛡️</span><span>HAKI</span>
-        <span class="jewel-badge jewel-emerald"><?= $cntHaki ?></span>
-    </a>
-    <a href="<?= e(url('admin/index.php?page=aik')) ?>" class="<?= $currentPage === 'aik' ? 'active' : '' ?>">
-        <span class="ico-3d ico-3d-emerald">🕌</span><span>AIK & Catur Dharma</span>
-        <span class="jewel-badge jewel-emerald"><?= $cntAik ?></span>
-    </a>
+            <span class="menu-label-3d">Catur Dharma</span>
+            <a href="<?= e(url('admin/index.php?page=penelitian')) ?>" class="<?= $currentPage === 'penelitian' ? 'active' : '' ?>">
+                <span class="ico-3d ico-3d-blue">🔬</span><span>Penelitian</span>
+                <span class="jewel-badge jewel-emerald"><?= $cntPenelitian ?></span>
+            </a>
+            <a href="<?= e(url('admin/index.php?page=pengabdian')) ?>" class="<?= $currentPage === 'pengabdian' ? 'active' : '' ?>">
+                <span class="ico-3d ico-3d-emerald">🤝</span><span>Pengabdian & KKN</span>
+                <span class="jewel-badge jewel-emerald"><?= $cntPengabdian ?></span>
+            </a>
+            <a href="<?= e(url('admin/index.php?page=publikasi')) ?>" class="<?= $currentPage === 'publikasi' ? 'active' : '' ?>">
+                <span class="ico-3d ico-3d-emerald">📚</span><span>Publikasi Ilmiah</span>
+                <span class="jewel-badge jewel-emerald"><?= $cntPublikasi ?></span>
+            </a>
+            <a href="<?= e(url('admin/index.php?page=haki')) ?>" class="<?= $currentPage === 'haki' ? 'active' : '' ?>">
+                <span class="ico-3d ico-3d-emerald">🛡️</span><span>HAKI</span>
+                <span class="jewel-badge jewel-emerald"><?= $cntHaki ?></span>
+            </a>
+            <a href="<?= e(url('admin/index.php?page=aik')) ?>" class="<?= $currentPage === 'aik' ? 'active' : '' ?>">
+                <span class="ico-3d ico-3d-emerald">🕌</span><span>AIK & Catur Dharma</span>
+                <span class="jewel-badge jewel-emerald"><?= $cntAik ?></span>
+            </a>
 
-    <span class="menu-label-3d">Layanan</span>
-    <a href="<?= e(url('admin/index.php?page=hibah')) ?>" class="<?= $currentPage === 'hibah' ? 'active' : '' ?>">
-        <span class="ico-3d ico-3d-gold">💰</span><span>Hibah & Pendanaan</span>
-        <span class="jewel-badge jewel-gold"><?= $cntHibah ?></span>
-    </a>
-    <a href="<?= e(url('admin/index.php?page=sertifikat')) ?>" class="<?= $currentPage === 'sertifikat' ? 'active' : '' ?>">
-        <span class="ico-3d ico-3d-gold">🎓</span><span>Sertifikat & Verifikasi</span>
-        <span class="jewel-badge jewel-gold"><?= $cntSertifikat ?></span>
-    </a>
-    <a href="<?= e(url('admin/index.php?page=kontak')) ?>" class="<?= $currentPage === 'kontak' ? 'active' : '' ?>">
-        <span class="ico-3d ico-3d-blue">📞</span><span>Kontak & FAQ</span>
-        <span class="jewel-badge jewel-gold"><?= $cntFaq ?></span>
-    </a>
+            <span class="menu-label-3d">Layanan</span>
+            <a href="<?= e(url('admin/index.php?page=hibah')) ?>" class="<?= $currentPage === 'hibah' ? 'active' : '' ?>">
+                <span class="ico-3d ico-3d-gold">💰</span><span>Hibah & Pendanaan</span>
+                <span class="jewel-badge jewel-gold"><?= $cntHibah ?></span>
+            </a>
+            <a href="<?= e(url('admin/index.php?page=sertifikat')) ?>" class="<?= $currentPage === 'sertifikat' ? 'active' : '' ?>">
+                <span class="ico-3d ico-3d-gold">🎓</span><span>Sertifikat & Verifikasi</span>
+                <span class="jewel-badge jewel-gold"><?= $cntSertifikat ?></span>
+            </a>
+            <a href="<?= e(url('admin/index.php?page=kontak')) ?>" class="<?= $currentPage === 'kontak' ? 'active' : '' ?>">
+                <span class="ico-3d ico-3d-blue">📞</span><span>Kontak & FAQ</span>
+                <span class="jewel-badge jewel-gold"><?= $cntFaq ?></span>
+            </a>
 
-    <span class="menu-label-3d">Layanan Cerdas ✦</span>
-    <a href="<?= e(url('admin/index.php?page=reviewers')) ?>" class="<?= $currentPage === 'reviewers' ? 'active' : '' ?>">
-        <span class="ico-3d ico-3d-blue">👥</span><span>Reviewer</span>
-        <span class="jewel-badge jewel-emerald"><?= $cntReviewers ?></span>
-    </a>
-    <a href="<?= e(url('admin/index.php?page=events')) ?>" class="<?= $currentPage === 'events' ? 'active' : '' ?>">
-        <span class="ico-3d ico-3d-gold">📅</span><span>Kalender Kegiatan</span>
-        <span class="jewel-badge jewel-gold"><?= $cntEvents ?></span>
-    </a>
-    <a href="<?= e(url('admin/index.php?page=plagiarism')) ?>" class="<?= $currentPage === 'plagiarism' ? 'active' : '' ?>">
-        <span class="ico-3d ico-3d-emerald">🔍</span><span>Cek Plagiat</span>
-        <span class="jewel-badge jewel-emerald"><?= $cntPlagiarism ?></span>
-    </a>
-    <a href="<?= e(url('admin/index.php?page=notifikasi')) ?>" class="<?= $currentPage === 'notifikasi' ? 'active' : '' ?>">
-        <span class="ico-3d ico-3d-gold">🔔</span><span>Notifikasi</span>
-        <?php if ($unreadNotif > 0): ?>
-            <span class="jewel-badge" style="background:linear-gradient(145deg,#f87171,#dc2626);color:#fff;"><?= $unreadNotif ?></span>
-        <?php endif; ?>
-    </a>
+            <span class="menu-label-3d">Layanan Cerdas ✦</span>
+            <a href="<?= e(url('admin/index.php?page=reviewers')) ?>" class="<?= $currentPage === 'reviewers' ? 'active' : '' ?>">
+                <span class="ico-3d ico-3d-blue">👥</span><span>Reviewer</span>
+                <span class="jewel-badge jewel-emerald"><?= $cntReviewers ?></span>
+            </a>
+            <a href="<?= e(url('admin/index.php?page=events')) ?>" class="<?= $currentPage === 'events' ? 'active' : '' ?>">
+                <span class="ico-3d ico-3d-gold">📅</span><span>Kalender Kegiatan</span>
+                <span class="jewel-badge jewel-gold"><?= $cntEvents ?></span>
+            </a>
+            <a href="<?= e(url('admin/index.php?page=plagiarism')) ?>" class="<?= $currentPage === 'plagiarism' ? 'active' : '' ?>">
+                <span class="ico-3d ico-3d-emerald">🔍</span><span>Cek Plagiat</span>
+                <span class="jewel-badge jewel-emerald"><?= $cntPlagiarism ?></span>
+            </a>
+            <a href="<?= e(url('admin/index.php?page=survei')) ?>" class="<?= strpos($currentPage, 'survei') === 0 ? 'active' : '' ?>">
+                <span class="ico-3d ico-3d-purple">📝</span><span>Survei Kepuasan</span>
+                <span class="jewel-badge jewel-emerald"><?= $cntSurvey ?></span>
+            </a>
+            <a href="<?= e(url('admin/index.php?page=notifikasi')) ?>" class="<?= $currentPage === 'notifikasi' ? 'active' : '' ?>">
+                <span class="ico-3d ico-3d-gold">🔔</span><span>Notifikasi</span>
+                <?php if ($unreadNotif > 0): ?>
+                    <span class="jewel-badge" style="background:linear-gradient(145deg,#f87171,#dc2626);color:#fff;"><?= $unreadNotif ?></span>
+                <?php endif; ?>
+            </a>
 
-    <span class="menu-label-3d">Sistem</span>
+            <span class="menu-label-3d">Sistem</span>
+            <?php if ($isSuper): ?>
+                <a href="<?= e(url('admin/index.php?page=users')) ?>" class="<?= strpos($currentPage, 'users') === 0 ? 'active' : '' ?>">
+                    <span class="ico-3d ico-3d-blue">👤</span><span>Manajemen Pengguna</span>
+                    <span class="jewel-badge jewel-gold"><?= $cntUsers ?></span>
+                </a>
+                <a href="<?= e(url('admin/index.php?page=audit')) ?>" class="<?= strpos($currentPage, 'audit') === 0 ? 'active' : '' ?>">
+                    <span class="ico-3d ico-3d-blue">📜</span><span>Audit Log</span>
+                    <span class="jewel-badge jewel-emerald">
+                        <?= (int) $db->query("SELECT COUNT(*) FROM audit_logs WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)")->fetchColumn() ?>
+                    </span>
+                </a>
+                <a href="<?= e(url('admin/index.php?page=laporan')) ?>" class="<?= strpos($currentPage, 'laporan') === 0 ? 'active' : '' ?>">
+                    <span class="ico-3d ico-3d-gold">📊</span><span>Laporan & Export</span>
+                </a>
+                <a href="<?= e(url('admin/index.php?page=backup')) ?>" class="<?= strpos($currentPage, 'backup') === 0 ? 'active' : '' ?>">
+                    <span class="ico-3d ico-3d-red">💾</span><span>Backup & Maintenance</span>
+                </a>
+            <?php endif; ?>
 
-    <?php if ($isSuper): ?>
-        <a href="<?= e(url('admin/index.php?page=users')) ?>" class="<?= strpos($currentPage, 'users') === 0 ? 'active' : '' ?>">
-            <span class="ico-3d ico-3d-blue">👤</span><span>Manajemen Pengguna</span>
-            <span class="jewel-badge jewel-gold"><?= $cntUsers ?></span>
-        </a>
-
-        <a href="<?= e(url('admin/index.php?page=audit')) ?>" class="<?= strpos($currentPage, 'audit') === 0 ? 'active' : '' ?>">
-            <span class="ico-3d ico-3d-blue">📜</span><span>Audit Log</span>
-            <span class="jewel-badge jewel-emerald">
-                <?= (int) Database::pdo()->query("SELECT COUNT(*) FROM audit_logs WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)")->fetchColumn() ?>
-            </span>
-        </a>
-    <?php endif; ?>
-
-    <a href="<?= e(url('admin/index.php?page=pengaturan')) ?>" class="<?= $currentPage === 'pengaturan' ? 'active' : '' ?>">
-        <span class="ico-3d">⚙️</span><span>Pengaturan Website</span>
-    </a>
-    <a href="<?= e(url('public/index.php?page=home')) ?>" target="_blank">
-        <span class="ico-3d">🌐</span><span>Lihat Website</span>
-        <span style="margin-left:auto; font-size:10px; opacity:.5;">↗</span>
-    </a>
-    <a href="<?= e(url('admin/index.php?page=logout')) ?>" style="color:#fca5a5;">
-        <span class="ico-3d ico-3d-red">🚪</span><span>Logout</span>
-    </a>
-</nav>
+            <a href="<?= e(url('admin/index.php?page=pengaturan')) ?>" class="<?= $currentPage === 'pengaturan' ? 'active' : '' ?>">
+                <span class="ico-3d">⚙️</span><span>Pengaturan Website</span>
+            </a>
+            <a href="<?= e(url('public/index.php?page=home')) ?>" target="_blank">
+                <span class="ico-3d">🌐</span><span>Lihat Website</span>
+                <span style="margin-left:auto; font-size:10px; opacity:.5;">↗</span>
+            </a>
+            <a href="<?= e(url('admin/index.php?page=logout')) ?>" style="color:#fca5a5;">
+                <span class="ico-3d ico-3d-red">🚪</span><span>Logout</span>
+            </a>
+        </nav>
 
         <!-- System Pulse -->
         <div class="sb2-pulse">
@@ -364,6 +390,13 @@ $firstName = explode(' ', trim($adminName))[0] ?? 'Admin';
         </header>
 
         <main class="admin-main">
+            <?php if ($maintenanceOn): ?>
+            <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:18px; padding:13px 18px; border-radius:14px; background:linear-gradient(145deg,rgba(245,158,11,.16),rgba(245,158,11,.08)); border:1px solid rgba(245,158,11,.45); color:#fcd34d; font-size:13px; font-weight:800;">
+                🚧 <span>Mode maintenance AKTIF — situs publik sedang ditutup sementara.</span>
+                <a href="<?= e(url('admin/index.php?page=backup')) ?>" style="margin-left:auto; padding:6px 14px; border-radius:9px; background:rgba(245,158,11,.2); border:1px solid rgba(245,158,11,.5); color:#fde68a; text-decoration:none; font-size:12px;">Kelola →</a>
+            </div>
+            <?php endif; ?>
+
             <?= $content ?>
 
             <footer style="margin-top:40px; padding:18px 0 4px; border-top:1px solid rgba(255,255,255,.06); display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; font-size:11px; color:rgba(255,255,255,.5);">

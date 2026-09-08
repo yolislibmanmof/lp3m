@@ -2,6 +2,12 @@
 
 require dirname(__DIR__) . '/app/bootstrap.php';
 
+// 🚧 MAINTENANCE MODE — situs publik ditutup sementara
+if (Maintenance::isOn()) {
+    Maintenance::showPage();
+    exit;
+}
+
 $page = $_GET['page'] ?? 'home';
 
 switch ($page) {
@@ -134,6 +140,11 @@ switch ($page) {
         'title' => 'Panduan Layanan | ' . APP_NAME,
     ]);
     break;
+
+    case 'survei':        PublicSurvey::index();  break;
+    case 'survei-isi':    PublicSurvey::fill((int) ($_GET['id'] ?? 0)); break;
+    case 'survei-kirim':  PublicSurvey::submit(); break;
+    case 'survei-sukses': PublicSurvey::thanks(); break;
 
     default:
         http_response_code(404);

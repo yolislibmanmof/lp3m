@@ -61,6 +61,10 @@ require BASE_PATH . '/app/Models/Notification.php';
 require BASE_PATH . '/app/Models/PlagiarismCheck.php';
 require BASE_PATH . '/app/Models/User.php';
 require BASE_PATH . '/app/Models/AuditLog.php';
+require BASE_PATH . '/app/Models/Report.php';
+require BASE_PATH . '/app/Models/Survey.php';
+require BASE_PATH . '/app/Models/Maintenance.php';
+require BASE_PATH . '/app/Models/BackupManager.php';
 
 // ============================================
 // CONTROLLERS
@@ -91,6 +95,10 @@ require BASE_PATH . '/app/Controllers/PublicPlagiarism.php';
 require BASE_PATH . '/app/Controllers/AdminDashboard.php';
 require BASE_PATH . '/app/Controllers/AdminUser.php';
 require BASE_PATH . '/app/Controllers/AdminAuditLog.php';
+require BASE_PATH . '/app/Controllers/AdminReport.php';
+require BASE_PATH . '/app/Controllers/AdminSurvey.php';
+require BASE_PATH . '/app/Controllers/PublicSurvey.php';
+require BASE_PATH . '/app/Controllers/AdminBackup.php';
 
 // ============================================
 // GLOBAL HELPERS

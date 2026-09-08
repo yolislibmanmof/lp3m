@@ -423,6 +423,43 @@ switch ($page) {
         AdminAuditLog::destroy();
         break;
 
+    // ── Laporan & Export ───────────────────────────────────
+    case 'laporan':
+        AdminReport::index();
+        break;
+    case 'laporan-modul':
+        AdminReport::module((string) ($_GET['modul'] ?? ''), $_GET['start'] ?? '', $_GET['end'] ?? '');
+        break;
+    case 'laporan-export-csv':
+        AdminReport::exportCsv((string) ($_GET['modul'] ?? ''), $_GET['start'] ?? '', $_GET['end'] ?? '');
+        break;
+    case 'laporan-print':
+        AdminReport::printView($_GET['start'] ?? '', $_GET['end'] ?? '');
+        break;
+    case 'laporan-tahunan':
+        AdminReport::annualReport((int) ($_GET['tahun'] ?? date('Y')));
+        break;
+
+    // ── Survei Kepuasan ────────────────────────────────────
+    case 'survei':             AdminSurvey::index();  break;
+    case 'survei-tambah':      AdminSurvey::create(); break;
+    case 'survei-simpan':      AdminSurvey::store();  break;
+    case 'survei-edit':        AdminSurvey::edit((int) ($_GET['id'] ?? 0)); break;
+    case 'survei-update':      AdminSurvey::update(); break;
+    case 'survei-hapus':       AdminSurvey::destroy(); break;
+    case 'survei-status':      AdminSurvey::toggle(); break;
+    case 'survei-hasil':       AdminSurvey::results((int) ($_GET['id'] ?? 0)); break;
+    case 'survei-export':      AdminSurvey::export((int) ($_GET['id'] ?? 0)); break;
+
+    // ── Backup & Maintenance ───────────────────────────────
+    case 'backup':           AdminBackup::index();  break;
+    case 'backup-buat':      AdminBackup::create(); break;
+    case 'backup-zip':       AdminBackup::zipUploads(); break;
+    case 'backup-unduh':    AdminBackup::download(); break;
+    case 'backup-hapus':     AdminBackup::destroy(); break;
+    case 'backup-restore':   AdminBackup::restore(); break;
+    case 'backup-maintenance': AdminBackup::toggleMaintenance(); break;
+
     // ── Manajemen Pengguna (khusus Super Admin) ───────────────
     case 'users':
         AdminUser::index();
