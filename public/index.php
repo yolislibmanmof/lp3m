@@ -187,6 +187,12 @@ switch ($page) {
     case 'subscribe':   PublicSubscribe::subscribe(); break;
     case 'unsubscribe': PublicSubscribe::unsubscribe(); break;
 
+    // ── Multimedia Publik ──────────────────────────────────
+    case 'video':        PublicMedia::videos(); break;
+    case 'podcast':      PublicMedia::podcasts(); break;
+    case 'video-view':   PublicMedia::countView(); break;
+    case 'podcast-play': PublicMedia::countPlay(); break;
+
     // ── 🤖 CHATBOT API (dari Tahap AI-1) ─────────────────────
     case 'chatbot-api':
         ApiChatbot::reply();

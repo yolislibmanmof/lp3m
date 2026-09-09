@@ -279,10 +279,13 @@ $__pageTitle = $title ?? ($brand . ' — Lembaga Penelitian & Pengabdian');
                     </a>
                 </li>
 
-                <li>
-                    <a href="<?= e(url('public/index.php?page=galeri')) ?>" class="<?= $__page === 'galeri' ? 'active' : '' ?>">
-                        <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg></span>Galeri
-                    </a>
+                <li class="has-dropdown">
+                    <a href="#" class="dropdown-toggle <?= in_array($__page, ['galeri', 'video', 'podcast'], true) ? 'active' : '' ?>"><span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg></span>Galeri</a>
+                    <div class="dropdown-menu">
+                        <a href="<?= e(url('public/index.php?page=galeri')) ?>" class="dropdown-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg> Galeri Foto</a>
+                        <a href="<?= e(url('public/index.php?page=video')) ?>" class="dropdown-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg> Video Kegiatan</a>
+                        <a href="<?= e(url('public/index.php?page=podcast')) ?>" class="dropdown-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg> Podcast</a>
+                    </div>
                 </li>
 
                 <li>

@@ -112,8 +112,10 @@ require BASE_PATH . '/app/Controllers/AdminUser.php';
 require BASE_PATH . '/app/Controllers/AdminAuditLog.php';
 require BASE_PATH . '/app/Controllers/AdminReport.php';
 require BASE_PATH . '/app/Controllers/AdminSurvey.php';
+require BASE_PATH . '/app/Controllers/PublicSurvey.php';
 require BASE_PATH . '/app/Controllers/AdminBackup.php';
 require BASE_PATH . '/app/Controllers/AdminVideo.php';
+require BASE_PATH . '/app/Controllers/AdminPodcast.php';
 
 // ============================================
 // CONTROLLERS — FITUR BARU (Chatbot · Dosen · Newsletter · Integrasi)
@@ -125,6 +127,7 @@ require BASE_PATH . '/app/Controllers/AdminProfile.php';
 require BASE_PATH . '/app/Controllers/AdminIntegrations.php';
 require BASE_PATH . '/app/Controllers/AdminBroadcast.php';
 require BASE_PATH . '/app/Controllers/PublicSubscribe.php';
+require BASE_PATH . '/app/Controllers/PublicMedia.php';
 
 // ============================================
 // GLOBAL HELPERS

@@ -3,7 +3,16 @@
 declare(strict_types=1);
 
 /**
- * Model Podcast — episode audio lembaga (upload MP3 atau URL eksternal).
+ * ══════════════════════════════════════════════════════════════
+ *  Model Podcast — Episode Audio LP3M UNIMOF
+ * ══════════════════════════════════════════════════════════════
+ *
+ *  Mendukung 2 sumber audio:
+ *    - Upload lokal (MP3/M4A/OGG ke public/uploads/podcast/)
+ *    - URL eksternal (https://... untuk podcast hosting)
+ *
+ *  Kategori: Diskusi, Wawancara, Kuliah Tamu, Kisah Inspiratif, Lainnya.
+ * ══════════════════════════════════════════════════════════════
  */
 class Podcast
 {
@@ -49,7 +58,8 @@ class Podcast
 
     public static function find(int $id): ?array
     {
-        $s = Database::pdo()->prepare('SELECT * FROM podcasts WHERE id = ?'); $s->execute([$id]);
+        $s = Database::pdo()->prepare('SELECT * FROM podcasts WHERE id = ?');
+        $s->execute([$id]);
         return $s->fetch() ?: null;
     }
 
@@ -72,9 +82,9 @@ class Podcast
     public static function update(int $id, array $d): void
     {
         Database::pdo()->prepare(
-            'UPDATE podcasts SET title=?, episode=?, description=?, category=?, audio_path=?, cover=?, duration=?, guest=?, status=?,
-             published_at = CASE WHEN ? = \'published\' AND published_at IS NULL THEN NOW() ELSE published_at END
-             WHERE id=?'
+            "UPDATE podcasts SET title=?, episode=?, description=?, category=?, audio_path=?, cover=?, duration=?, guest=?, status=?,
+             published_at = CASE WHEN ? = 'published' AND published_at IS NULL THEN NOW() ELSE published_at END
+             WHERE id=?"
         )->execute([
             $d['title'], $d['episode'] ?? null, $d['description'] ?? null, $d['category'],
             $d['audio_path'], $d['cover'] ?? null, $d['duration'] ?? null, $d['guest'] ?? null,
@@ -82,14 +92,15 @@ class Podcast
         ]);
     }
 
+    /** Hapus podcast + file audio & cover lokal (skip URL eksternal) */
     public static function delete(int $id): void
     {
         $p = self::find($id);
         if ($p) {
             foreach (['audio_path', 'cover'] as $f) {
-                $path = $p[$f] ?? '';
-                if ($path && !str_starts_with($path, 'http')) {
-                    $file = BASE_PATH . '/public/' . ltrim($path, '/');
+                $path = (string) ($p[$f] ?? '');
+                if ($path !== '' && !str_starts_with($path, 'http')) {
+                    $file = BASE_PATH . '/public/uploads/' . ltrim($path, '/');
                     if (is_file($file)) @unlink($file);
                 }
             }
@@ -99,7 +110,8 @@ class Podcast
 
     public static function toggleStatus(int $id): void
     {
-        Database::pdo()->prepare("UPDATE podcasts SET status = IF(status='published','draft','published'), published_at = IF(status='draft', NOW(), published_at) WHERE id=?")->execute([$id]);
+        $pdo = Database::pdo();
+        $pdo->prepare("UPDATE podcasts SET status = IF(status='published','draft','published'), published_at = IF(status='draft', NOW(), published_at) WHERE id=?")->execute([$id]);
     }
 
     public static function incrPlays(int $id): void
@@ -121,12 +133,15 @@ class Podcast
     public static function audioUrl(array $p): string
     {
         $path = (string) ($p['audio_path'] ?? '');
+        if ($path === '') return '';
         return str_starts_with($path, 'http') ? $path : upload_url($path);
     }
 
+    /** URL cover episode (dukung upload lokal ATAU URL eksternal) */
     public static function coverUrl(array $p): string
     {
         $path = (string) ($p['cover'] ?? '');
-        return $path !== '' ? (str_starts_with($path, 'http') ? $path : upload_url($path)) : '';
+        if ($path === '') return '';
+        return str_starts_with($path, 'http') ? $path : upload_url($path);
     }
 }

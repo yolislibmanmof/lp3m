@@ -82,7 +82,11 @@
     <?php foreach ($items as $v): $thumb = Video::thumbUrl($v); ?>
     <tr>
         <td>
-            <?php if ($thumb !== ''): ?><img class="vd-thumb" src="<?= e($thumb) ?>" alt=""><?= else: ?><div class="vd-thumb"></div><?php endif; ?>
+            <?php if ($thumb !== ''): ?>
+                <img class="vd-thumb" src="<?= e($thumb) ?>" alt="">
+            <?php else: ?>
+                <div class="vd-thumb"></div>
+            <?php endif; ?>
         </td>
         <td style="font-weight:800; max-width:260px;"><?= e($v['title']) ?></td>
         <td style="color:var(--muted);"><?= e($categories[$v['category']] ?? $v['category']) ?></td>
@@ -116,4 +120,5 @@
     <?php endfor; ?>
 </div>
 <?php endif; ?>
+
 <?php endif; ?>

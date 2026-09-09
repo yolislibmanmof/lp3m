@@ -192,6 +192,9 @@ $pageTitles = [
     'video'        => 'Kelola galeri video lembaga',
     'video-tambah' => 'Tambah video baru',
     'video-edit'   => 'Edit video',
+    'podcast'        => 'Kelola podcast lembaga',
+    'podcast-tambah' => 'Tambah episode baru',
+    'podcast-edit'   => 'Edit episode',
 ];
 
 $pageSub   = $pageTitles[$currentPage] ?? '';
@@ -238,6 +241,11 @@ $firstName = explode(' ', trim($adminName))[0] ?? 'Admin';
             <a href="<?= e(url('admin/index.php?page=video')) ?>" class="<?= strpos($currentPage, 'video') === 0 ? 'active' : '' ?>">
                 <span class="ico-3d ico-3d-purple">🎥</span><span>Galeri Video</span>
                 <span class="jewel-badge jewel-gold"><?= (int) $db->query('SELECT COUNT(*) FROM videos')->fetchColumn() ?></span>
+            </a>
+
+            <a href="<?= e(url('admin/index.php?page=podcast')) ?>" class="<?= strpos($currentPage, 'podcast') === 0 ? 'active' : '' ?>">
+                <span class="ico-3d ico-3d-gold">🎙️</span><span>Podcast</span>
+                <span class="jewel-badge jewel-gold"><?= (int) $db->query('SELECT COUNT(*) FROM podcasts')->fetchColumn() ?></span>
             </a>
 
             <span class="menu-label-3d">Catur Dharma</span>

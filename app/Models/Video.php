@@ -3,7 +3,17 @@
 declare(strict_types=1);
 
 /**
- * Model Video — galeri video lembaga (YouTube / Vimeo / MP4 self-host).
+ * ══════════════════════════════════════════════════════════════
+ *  Model Video — Galeri Video LP3M UNIMOF
+ * ══════════════════════════════════════════════════════════════
+ *
+ *  Mendukung 3 sumber video:
+ *    - youtube : URL/ID YouTube (auto thumbnail + embed privacy-enhanced)
+ *    - vimeo   : URL Vimeo
+ *    - mp4     : upload file MP4/WEBM atau URL eksternal
+ *
+ *  Kategori: Seminar, Workshop, Profil, Dokumentasi, Tutorial, Lainnya.
+ * ══════════════════════════════════════════════════════════════
  */
 class Video
 {
@@ -56,7 +66,8 @@ class Video
 
     public static function find(int $id): ?array
     {
-        $s = Database::pdo()->prepare('SELECT * FROM videos WHERE id = ?'); $s->execute([$id]);
+        $s = Database::pdo()->prepare('SELECT * FROM videos WHERE id = ?');
+        $s->execute([$id]);
         return $s->fetch() ?: null;
     }
 
@@ -79,9 +90,9 @@ class Video
     public static function update(int $id, array $d): void
     {
         Database::pdo()->prepare(
-            'UPDATE videos SET title=?, description=?, category=?, source=?, youtube_id=?, video_url=?, thumbnail=?, duration=?, status=?,
-             published_at = CASE WHEN ? = \'published\' AND published_at IS NULL THEN NOW() ELSE published_at END
-             WHERE id=?'
+            "UPDATE videos SET title=?, description=?, category=?, source=?, youtube_id=?, video_url=?, thumbnail=?, duration=?, status=?,
+             published_at = CASE WHEN ? = 'published' AND published_at IS NULL THEN NOW() ELSE published_at END
+             WHERE id=?"
         )->execute([
             $d['title'], $d['description'] ?? null, $d['category'], $d['source'],
             $d['youtube_id'] ?? null, $d['video_url'] ?? null, $d['thumbnail'] ?? null,
@@ -89,14 +100,15 @@ class Video
         ]);
     }
 
+    /** Hapus video + file thumbnail & MP4 lokal (skip URL eksternal) */
     public static function delete(int $id): void
     {
         $v = self::find($id);
         if ($v) {
             foreach (['thumbnail', 'video_url'] as $f) {
-                $p = $v[$f] ?? '';
-                if ($p && !str_starts_with($p, 'http')) {
-                    $file = BASE_PATH . '/public/' . ltrim($p, '/');
+                $p = (string) ($v[$f] ?? '');
+                if ($p !== '' && !str_starts_with($p, 'http')) {
+                    $file = BASE_PATH . '/public/uploads/' . ltrim($p, '/');
                     if (is_file($file)) @unlink($file);
                 }
             }
@@ -134,7 +146,7 @@ class Video
         return '';
     }
 
-    /** URL embed untuk player */
+    /** URL embed untuk player (YouTube pakai privacy-enhanced) */
     public static function embedUrl(array $v): string
     {
         if ($v['source'] === 'youtube' && !empty($v['youtube_id'])) {
@@ -149,7 +161,7 @@ class Video
         return (string) $v['video_url']; // mp4
     }
 
-    /** URL thumbnail (auto dari YouTube bila tidak upload) */
+    /** URL thumbnail (auto dari YouTube bila tidak upload custom) */
     public static function thumbUrl(array $v): string
     {
         if (!empty($v['thumbnail'])) return upload_url($v['thumbnail']);

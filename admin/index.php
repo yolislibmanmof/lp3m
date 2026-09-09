@@ -511,6 +511,15 @@ switch ($page) {
     case 'video-hapus':    AdminVideo::destroy(); break;
     case 'video-toggle':   AdminVideo::toggle(); break;
 
+    // ── Podcast ────────────────────────────────────────────
+    case 'podcast':          AdminPodcast::index(); break;
+    case 'podcast-tambah':   AdminPodcast::create(); break;
+    case 'podcast-simpan':   AdminPodcast::store(); break;
+    case 'podcast-edit':     AdminPodcast::edit((int) ($_GET['id'] ?? 0)); break;
+    case 'podcast-update':   AdminPodcast::update(); break;
+    case 'podcast-hapus':    AdminPodcast::destroy(); break;
+    case 'podcast-toggle':   AdminPodcast::toggle(); break;
+
     // ── Chatbot API (endpoint publik & admin) ──────────────
     case 'chatbot-api':
         ApiChatbot::reply();
