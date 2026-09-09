@@ -460,6 +460,94 @@ switch ($page) {
     case 'backup-restore':   AdminBackup::restore(); break;
     case 'backup-maintenance': AdminBackup::toggleMaintenance(); break;
 
+    // ── Profil Saya (untuk semua role yang login) ──────────
+    case 'profil-saya':
+        AdminProfile::index();
+        break;
+
+    // ── Newsletter & Broadcast ─────────────────────────────
+    case 'broadcast':                    AdminBroadcast::index(); break;
+    case 'broadcast-tambah':             AdminBroadcast::create(); break;
+    case 'broadcast-simpan':             AdminBroadcast::store(); break;
+    case 'broadcast-kirim':              AdminBroadcast::sendNow(); break;
+    case 'broadcast-hapus':              AdminBroadcast::destroy(); break;
+    case 'broadcast-subscribers':        AdminBroadcast::subscribers(); break;
+    case 'broadcast-subscriber-hapus':   AdminBroadcast::subscriberDelete(); break;
+    case 'broadcast-subscriber-export':  AdminBroadcast::subscriberExport(); break;
+    case 'broadcast-log':                AdminBroadcast::logs(); break;
+    case 'broadcast-test':               AdminBroadcast::testSmtp(); break;
+
+    // ── Integrations (SINTA, DOI, Scholar) ─────────────────
+    case 'integrations':
+        AdminIntegrations::index();
+        break;
+
+    case 'integrations-doi':
+        AdminIntegrations::fetchDoi();
+        break;
+
+    case 'integrations-doi-live':
+        AdminIntegrations::fetchDoiLive();
+        break;
+
+    case 'integrations-sinta-import':
+        AdminIntegrations::importSintaCsv();
+        break;
+
+    case 'integrations-scholar':
+        AdminIntegrations::fetchScholar();
+        break;
+
+    case 'integrations-log-export':
+        AdminIntegrations::exportLog();
+        break;
+
+    // ── Chatbot API (endpoint publik & admin) ──────────────
+    case 'chatbot-api':
+        ApiChatbot::reply();
+        break;
+
+    case 'chatbot-log':
+        ApiChatbot::logFeedback();
+        break;
+
+    // ── Chatbot Siti (Admin Panel) ─────────────────────────
+    case 'chatbot':
+        AdminChatbot::index();
+        break;
+
+    case 'chatbot-knowledge':
+        AdminChatbot::knowledge();
+        break;
+
+    case 'chatbot-knowledge-save':
+        AdminChatbot::knowledgeSave();
+        break;
+
+    case 'chatbot-knowledge-delete':
+        AdminChatbot::knowledgeDelete();
+        break;
+
+    case 'chatbot-knowledge-toggle':
+        AdminChatbot::knowledgeToggle();
+        break;
+
+    case 'chatbot-config':
+        AdminChatbot::config();
+        break;
+
+    case 'chatbot-config-save':
+        AdminChatbot::configSave();
+        break;
+
+    case 'chatbot-export':
+        AdminChatbot::exportLogs();
+        break;
+
+    case 'chatbot-clear':
+        AdminChatbot::clearLogs();
+        break;
+
     // ── Manajemen Pengguna (khusus Super Admin) ───────────────
     case 'users':
         AdminUser::index();

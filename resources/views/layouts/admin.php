@@ -109,6 +109,10 @@ $cntPlagiarism = (int) $db->query('SELECT COUNT(*) FROM plagiarism_checks')->fet
 $cntUsers      = (int) $db->query('SELECT COUNT(*) FROM users')->fetchColumn();
 $cntSurvey     = (int) $db->query('SELECT COUNT(*) FROM surveys')->fetchColumn();
 
+// 🆕 Chatbot knowledge base (dibungkus try-catch agar aman jika tabel belum dibuat)
+$cntChatbot = 0;
+try { $cntChatbot = (int) $db->query('SELECT COUNT(*) FROM chatbot_knowledge')->fetchColumn(); } catch (\Throwable $e) {}
+
 $adminId     = (int) (Auth::user()['id'] ?? 0);
 $unreadNotif = (int) $db->query("SELECT COUNT(*) FROM notifications WHERE is_read = 0 AND (is_global = 1 OR user_id = " . $adminId . ")")->fetchColumn();
 
@@ -170,6 +174,10 @@ $pageTitles = [
     'laporan-modul'   => 'Detail laporan per modul',
     'laporan-print'   => 'Laporan cetak (PDF)',
     'laporan-tahunan' => 'Laporan tahunan',
+    'integrations'    => 'Integrasi SINTA, DOI & Scholar',
+    'broadcast'       => 'Newsletter & broadcast email',
+    'broadcast-tambah' => 'Tulis broadcast baru',
+    'broadcast-subscribers' => 'Manajemen subscriber',
     // 🆕 TAHAP G — Survei
     'survei'          => 'Survei kepuasan & EDOM',
     'survei-tambah'   => 'Buat survei baru',
@@ -177,6 +185,10 @@ $pageTitles = [
     'survei-hasil'    => 'Hasil survei & statistik',
     // 🆕 TAHAP D — Backup & Maintenance
     'backup'          => 'Backup database & mode perawatan',
+    // 🆕 TAHAP AI-1 — Chatbot Siti
+    'chatbot'                 => 'Dashboard chatbot Siti',
+    'chatbot-knowledge'       => 'Kelola knowledge base',
+    'chatbot-config'          => 'Konfigurasi AI Siti',
 ];
 
 $pageSub   = $pageTitles[$currentPage] ?? '';
@@ -193,7 +205,7 @@ $firstName = explode(' ', trim($adminName))[0] ?? 'Admin';
         <div class="sb2-brand">
             <div class="sb2-logo"><span style="position:relative; z-index:1;">LP</span></div>
             <div class="sb2-brand-title">
-                <div class="brand-3d" style="font-size:16px; line-height:1.1;">LP3M UNIMOF</div>
+                <div class="brand-3d" style="font-size:16px; line-height:1.1;">LP3M</div>
                 <div class="sb2-brand-sub">Elevate Command Center</div>
             </div>
             <span class="sb2-ver">v4.0</span>
@@ -261,6 +273,15 @@ $firstName = explode(' ', trim($adminName))[0] ?? 'Admin';
                 <span class="ico-3d ico-3d-blue">👥</span><span>Reviewer</span>
                 <span class="jewel-badge jewel-emerald"><?= $cntReviewers ?></span>
             </a>
+
+                <a href="<?= e(url('admin/index.php?page=integrations')) ?>" class="<?= strpos($currentPage, 'integrations') === 0 ? 'active' : '' ?>">
+                <span class="ico-3d ico-3d-blue">🔗</span><span>Integrasi Akademik</span>
+           </a>
+           
+               <a href="<?= e(url('admin/index.php?page=broadcast')) ?>" class="<?= strpos($currentPage, 'broadcast') === 0 ? 'active' : '' ?>">
+               <span class="ico-3d ico-3d-gold">📧</span><span>Newsletter & Broadcast</span>
+            </a>
+
             <a href="<?= e(url('admin/index.php?page=events')) ?>" class="<?= $currentPage === 'events' ? 'active' : '' ?>">
                 <span class="ico-3d ico-3d-gold">📅</span><span>Kalender Kegiatan</span>
                 <span class="jewel-badge jewel-gold"><?= $cntEvents ?></span>
@@ -272,6 +293,11 @@ $firstName = explode(' ', trim($adminName))[0] ?? 'Admin';
             <a href="<?= e(url('admin/index.php?page=survei')) ?>" class="<?= strpos($currentPage, 'survei') === 0 ? 'active' : '' ?>">
                 <span class="ico-3d ico-3d-purple">📝</span><span>Survei Kepuasan</span>
                 <span class="jewel-badge jewel-emerald"><?= $cntSurvey ?></span>
+            </a>
+            <!-- 🆕 TAHAP AI-1 — Chatbot Siti -->
+            <a href="<?= e(url('admin/index.php?page=chatbot')) ?>" class="<?= strpos($currentPage, 'chatbot') === 0 ? 'active' : '' ?>">
+                <span class="ico-3d ico-3d-emerald">🤖</span><span>Siti · Asisten AI</span>
+                <span class="jewel-badge jewel-emerald"><?= $cntChatbot ?></span>
             </a>
             <a href="<?= e(url('admin/index.php?page=notifikasi')) ?>" class="<?= $currentPage === 'notifikasi' ? 'active' : '' ?>">
                 <span class="ico-3d ico-3d-gold">🔔</span><span>Notifikasi</span>
@@ -401,7 +427,7 @@ $firstName = explode(' ', trim($adminName))[0] ?? 'Admin';
 
             <footer style="margin-top:40px; padding:18px 0 4px; border-top:1px solid rgba(255,255,255,.06); display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; font-size:11px; color:rgba(255,255,255,.5);">
                 <div style="display:flex; align-items:center; gap:10px;">
-                    <span style="font-weight:800; background:linear-gradient(135deg,#fde68a,#d9a441); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;">LP3M UNIMOF</span>
+                    <span style="font-weight:800; background:linear-gradient(135deg,#fde68a,#d9a441); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;">LP3M</span>
                     <span style="opacity:.5;">•</span>
                     <span>© <?= date('Y') ?> Elevate Edition</span>
                 </div>

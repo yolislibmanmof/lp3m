@@ -1,5 +1,4 @@
 <style>
-    @keyforms ufFade { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
     @keyframes ufFade { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
     @keyframes ufShine { 0%,55%{left:-90%} 100%{left:165%} }
 
@@ -69,15 +68,15 @@
     <span class="uf-badge"><?= $item !== null ? '✎ Edit' : '＋ Baru' ?></span>
 </div>
 
-<form method="post" action="<?= e($action) ?>" id="uf-form">
+<form method="post" action="<?= e($action) ?>" id="uf-form" enctype="multipart/form-data">
     <?= csrf_field() ?>
     <?php if ($item !== null): ?><input type="hidden" name="id" value="<?= (int) $item['id'] ?>"><?php endif; ?>
 
     <div class="uf-card">
-        <h3 class="uf-card-title"><span class="emo">🪪</span><span>Identitas Akun</span><span class="num">BAGIAN 1 / 3</span></h3>
+        <h3 class="uf-card-title"><span class="emo">🪪</span><span>Identitas Akun</span><span class="num">BAGIAN 1 / 4</span></h3>
         <div class="uf-field">
             <label class="uf-label">Nama Lengkap <span class="uf-req">WAJIB</span></label>
-            <input class="uf-input" type="text" name="name" required value="<?= e($item['name'] ?? old('name')) ?>" placeholder="Contoh: Valentinus Hurint, S.Kom.">
+            <input class="uf-input" type="text" name="name" required value="<?= e($item['name'] ?? old('name')) ?>" placeholder="Contoh: Dr. Ahmad Budi Santoso, M.Pd.">
         </div>
         <div class="uf-row2">
             <div class="uf-field">
@@ -92,7 +91,7 @@
     </div>
 
     <div class="uf-card" style="animation-delay:.06s">
-        <h3 class="uf-card-title"><span class="emo">🛡️</span><span>Role & Hak Akses</span><span class="num">BAGIAN 2 / 3</span></h3>
+        <h3 class="uf-card-title"><span class="emo">🛡️</span><span>Role & Hak Akses</span><span class="num">BAGIAN 2 / 4</span></h3>
         <div class="uf-field">
             <label class="uf-label">Role Pengguna</label>
             <select class="uf-select" name="role" id="uf-role">
@@ -112,7 +111,51 @@
     </div>
 
     <div class="uf-card" style="animation-delay:.12s">
-        <h3 class="uf-card-title"><span class="emo">🔑</span><span>Password</span><span class="num">BAGIAN 3 / 3</span></h3>
+        <h3 class="uf-card-title"><span class="emo">🎓</span><span>Profil Dosen</span><span class="num">BAGIAN 3 / 4 · OPSIONAL</span></h3>
+        <div class="uf-row2" style="margin-bottom:16px;">
+            <div class="uf-field">
+                <label class="uf-label">Foto Profil</label>
+                <input class="uf-input" type="file" name="photo" accept=".jpg,.jpeg,.png,.webp" style="padding:9px;">
+                <?php if (!empty($item['photo'])): ?>
+                <div style="margin-top:8px; display:flex; align-items:center; gap:8px;">
+                    <img src="<?= e(upload_url($item['photo'])) ?>" alt="Foto" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid var(--border);">
+                    <span style="font-size:11px; color:var(--muted);">Foto saat ini (akan diganti bila upload baru)</span>
+                </div>
+                <?php endif; ?>
+                <div class="uf-hint">📷 JPG/PNG/WEBP, maks 2 MB.</div>
+            </div>
+            <div class="uf-field">
+                <label class="uf-label">NIDN / NIDK</label>
+                <input class="uf-input" type="text" name="nidn" value="<?= e($item['nidn'] ?? '') ?>" placeholder="0012345678">
+            </div>
+        </div>
+        <div class="uf-field" style="margin-bottom:16px;">
+            <label class="uf-label">Institusi / Afliasi</label>
+            <input class="uf-input" type="text" name="institution" value="<?= e($item['institution'] ?? '') ?>" placeholder="Universitas Muhammadiyah Maumere">
+        </div>
+        <div class="uf-field" style="margin-bottom:16px;">
+            <label class="uf-label">Biografi Singkat</label>
+            <textarea class="uf-input" name="bio" rows="4" style="min-height:90px; line-height:1.6; resize:vertical;" placeholder="Riwayat singkat, keahlian, jabatan akademik, dan fokus riset..."><?= e($item['bio'] ?? '') ?></textarea>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px;">
+            <div class="uf-field">
+                <label class="uf-label">🎓 Google Scholar</label>
+                <input class="uf-input" type="url" name="scholar_url" value="<?= e($item['scholar_url'] ?? '') ?>" placeholder="https://scholar.google.com/...">
+            </div>
+            <div class="uf-field">
+                <label class="uf-label">📈 SINTA</label>
+                <input class="uf-input" type="url" name="sinta_url" value="<?= e($item['sinta_url'] ?? '') ?>" placeholder="https://sinta.kemdikbud.go.id/...">
+            </div>
+            <div class="uf-field">
+                <label class="uf-label">🆔 ORCID</label>
+                <input class="uf-input" type="text" name="orcid" value="<?= e($item['orcid'] ?? '') ?>" placeholder="0000-0000-0000-0000">
+            </div>
+        </div>
+        <div class="uf-hint">💡 Data ini akan tampil di Direktori Dosen publik dan profil personal dosen.</div>
+    </div>
+
+    <div class="uf-card" style="animation-delay:.18s">
+        <h3 class="uf-card-title"><span class="emo">🔑</span><span>Password</span><span class="num">BAGIAN 4 / 4</span></h3>
         <div class="uf-field">
             <label class="uf-label"><?= $item !== null ? 'Password Baru' : 'Password' ?> <span class="uf-opt"><?= $item !== null ? 'KOSONGKAN JIKA TIDAK DIGANTI' : 'MIN. 8 KARAKTER · KOSONG = AUTO' ?></span></label>
             <div class="uf-passwrap">

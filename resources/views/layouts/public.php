@@ -20,15 +20,12 @@ if ($footerText === '') {
     $footerLine = '&copy; ' . date('Y') . ' ' . $brand . '. ' . e($footerText);
 }
 
-// --- LIVE EVENT TICKER ---
+// --- AGENDA COUNT (untuk badge menu & footer) ---
 $upcomingCount = 0;
-$tickerEvents = [];
 try {
-    $db = Database::pdo();
-    $upcomingCount = (int) $db->query("SELECT COUNT(*) FROM events WHERE status='published' AND start_date >= CURDATE() AND start_date <= DATE_ADD(CURDATE(), INTERVAL 30 DAY)")->fetchColumn();
-    if ($upcomingCount > 0) {
-        $tickerEvents = $db->query("SELECT title, start_date FROM events WHERE status='published' AND start_date >= CURDATE() ORDER BY start_date ASC LIMIT 4")->fetchAll();
-    }
+    $upcomingCount = (int) Database::pdo()->query(
+        "SELECT COUNT(*) FROM events WHERE status='published' AND start_date >= CURDATE() AND start_date <= DATE_ADD(CURDATE(), INTERVAL 30 DAY)"
+    )->fetchColumn();
 } catch (\Throwable $e) { $upcomingCount = 0; }
 
 // --- PLAGIAT COUNT ---
@@ -38,8 +35,8 @@ try { $publicPlagCount = (int) Database::pdo()->query("SELECT COUNT(*) FROM plag
 // --- SEO DINAMIS ---
 $__page = $_GET['page'] ?? 'home';
 $__descMap = [
-    'home' => 'Portal resmi LP3M/LPPAIK UNIMOF — pusat informasi penelitian, pengabdian, publikasi, AIK, dan layanan mutu.',
-    'tentang' => 'Profil, visi misi, dan struktur organisasi LP3M/LPPAIK UNIMOF.',
+    'home' => 'Portal resmi LP3M — pusat informasi penelitian, pengabdian, publikasi, AIK, dan layanan mutu.',
+    'tentang' => 'Profil, visi misi, dan struktur organisasi LP3M.',
     'berita' => 'Berita dan pengumuman terbaru seputar kegiatan lembaga.',
     'galeri' => 'Dokumentasi visual kegiatan penelitian, pengabdian, dan AIK.',
     'penelitian' => 'Rekam jejak penelitian dosen: skema, pendanaan, dan luaran.',
@@ -52,6 +49,8 @@ $__descMap = [
     'kontak' => 'Kontak resmi lembaga dan pertanyaan yang sering diajukan.',
     'panduan' => 'Panduan lengkap menggunakan layanan digital LP3M.',
     'agenda' => 'Kalender dan agenda kegiatan lembaga.',
+    'survei' => 'Survei kepuasan layanan LP3M.',
+    'dosen' => 'Profil akademik dosen LP3M.',
     'cek-plagiat' => 'Pemeriksaan similaritas dokumen terhadap korpus internal.',
     'verifikasi-sertifikat' => 'Verifikasi keaslian sertifikat digital lembaga.',
 ];
@@ -92,17 +91,13 @@ $__pageTitle = $title ?? ($brand . ' — Lembaga Penelitian & Pengabdian');
         @keyframes wiggle { 0%,100% { transform: rotate(0); } 25% { transform: rotate(-8deg) scale(1.1); } 75% { transform: rotate(8deg) scale(1.1); } }
         @keyframes underlineGlow { 0%,100% { box-shadow: 0 0 6px rgba(217,164,65,0.4); } 50% { box-shadow: 0 0 14px rgba(217,164,65,0.9); } }
         @keyframes wmFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-        @keyframes brandPulse { 0%,100% { box-shadow: 0 0 0 3px var(--gold-soft), 0 0 10px rgba(217,164,65,0.5); } 50% { box-shadow: 0 0 0 6px var(--gold-soft), 0 0 18px rgba(217,164,65,0.9); } }
         @keyframes logoFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
         @keyframes orbDrift1 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(30px,-40px); } }
         @keyframes orbDrift2 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(-40px,30px); } }
         @keyframes ringSpin { to { transform: rotate(360deg); } }
         @keyframes monogramPop { 0% { transform: scale(0.4); opacity: 0; } 60% { transform: scale(1.15); } 100% { transform: scale(1); opacity: 1; } }
-        @keyframes shimmerText { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
         @keyframes typingCaret { 0%,100% { border-color: transparent; } 50% { border-color: #f2c063; } }
         @keyframes confettiFall { to { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
-        @keyframes dropdownFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes tickerScroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
         /* ============ SPLASH ============ */
         #splash { position: fixed; inset: 0; z-index: 99999; background: linear-gradient(135deg, #043b2c, #065f46 60%, #059669); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 18px; transition: opacity 0.8s cubic-bezier(0.4,0,0.2,1), visibility 0.8s, transform 0.8s ease; }
@@ -124,14 +119,14 @@ $__pageTitle = $title ?? ($brand . ' — Lembaga Penelitian & Pengabdian');
         /* ============ TOPBAR ============ */
         .topbar { animation: topbarIn 0.6s cubic-bezier(0.16,1,0.3,1) backwards; transition: transform 0.35s ease, background 0.3s ease; }
         .topbar.topbar-hidden { transform: translateY(-110%); }
-        .site-logo { animation: logoFloat 5s ease-in-out infinite; }
         .topbar-inner { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
         #main-menu { flex: 1; display: flex; justify-content: center; }
         .menu-toggle { flex: 0 0 auto; }
 
-        /* 🆕 BRAND BESAR & JELAS */
+        /* Brand besar & bersih (tanpa titik pulse) */
         .brand { display: flex; align-items: center; gap: 13px; text-decoration: none; flex: 0 0 auto; }
-        .brand .site-logo { height: 56px; width: auto; border-radius: 15px; box-shadow: 0 8px 20px rgba(3,37,31,.22), inset 0 1px 2px rgba(255,255,255,.4); }
+        .brand::after { display: none !important; }
+        .brand .site-logo { height: 56px; width: auto; border-radius: 15px; box-shadow: 0 8px 20px rgba(3,37,31,.22), inset 0 1px 2px rgba(255,255,255,.4); animation: logoFloat 5s ease-in-out infinite; }
         .brand-txt { display: flex; flex-direction: column; line-height: 1.08; }
         .brand-txt b { font-family: var(--font-display); font-size: 21px; font-weight: 900; color: var(--ink); letter-spacing: -0.02em; }
         .brand-txt span { font-size: 9px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
@@ -141,6 +136,7 @@ $__pageTitle = $title ?? ($brand . ' — Lembaga Penelitian & Pengabdian');
         .menu > li:nth-child(3) { animation-delay: 0.22s; } .menu > li:nth-child(4) { animation-delay: 0.28s; }
         .menu > li:nth-child(5) { animation-delay: 0.34s; } .menu > li:nth-child(6) { animation-delay: 0.40s; }
         .menu > li:nth-child(7) { animation-delay: 0.46s; }
+        .menu > li:nth-child(8) { animation-delay: 0.52s; }
         .menu a:hover .nav-ico { animation: wiggle 0.45s ease; }
         .menu a.active::after { animation: underlineGlow 2s ease-in-out infinite; }
         .main { animation: fadeUp 0.7s 0.15s cubic-bezier(0.16,1,0.3,1) both; }
@@ -168,18 +164,6 @@ $__pageTitle = $title ?? ($brand . ' — Lembaga Penelitian & Pengabdian');
         .dropdown-menu .dropdown-link:hover svg { stroke: white; opacity: 1; }
         .dropdown-menu .dropdown-link svg { width: 16px; height: 16px; opacity: 0.7; transition: all 0.2s; }
         .dropdown-item-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; border-radius: 999px; background: linear-gradient(145deg, #f2c063, #d9a441); color: #03251f; font-size: 9px; font-weight: 900; padding: 0 5px; margin-left: auto; }
-
-        /* 🆕 LIVE TICKER RAPI — satu baris, teks berputar */
-        .live-ticker { display: inline-flex; align-items: center; gap: 9px; max-width: 330px; padding: 7px 14px; border-radius: 999px; background: linear-gradient(145deg, rgba(16,185,129,0.16), rgba(5,150,105,0.08)); border: 1px solid rgba(16,185,129,0.35); text-decoration: none; color: #065f46; overflow: hidden; flex: 0 1 auto; transition: all .25s; }
-        .live-ticker:hover { border-color: rgba(16,185,129,.6); box-shadow: 0 6px 16px rgba(16,185,129,.2); transform: translateY(-1px); }
-        .live-ticker-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 0 0 rgba(16,185,129,0.6); animation: brandPulse 2s infinite; flex-shrink: 0; }
-        .live-ticker-count { flex-shrink: 0; min-width: 23px; height: 22px; padding: 0 7px; border-radius: 999px; background: linear-gradient(145deg, #fde68a, #d9a441); color: #03251f; font-size: 11px; font-weight: 900; display: inline-flex; align-items: center; justify-content: center; box-shadow: inset 0 1px 2px rgba(255,255,255,.6); }
-        .live-ticker-label { flex-shrink: 0; font-size: 10px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; color: #047857; }
-        .live-ticker-text { flex: 1; min-width: 0; font-size: 11.5px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: opacity .35s, transform .35s; }
-        .live-ticker-text.swap { opacity: 0; transform: translateY(7px); }
-        .live-ticker-arrow { flex-shrink: 0; font-weight: 900; color: #059669; }
-        @media (max-width: 1200px) { .live-ticker-text, .live-ticker-label { display: none; } .live-ticker { max-width: none; } }
-        @media (max-width: 900px) { .live-ticker { display: none; } }
 
         @media (max-width: 900px) {
             .topbar-inner { justify-content: space-between; }
@@ -237,13 +221,13 @@ $__pageTitle = $title ?? ($brand . ' — Lembaga Penelitian & Pengabdian');
         .section--cream, .section--teal, .section--lavender { margin-left: 0 !important; margin-right: 0 !important; border-radius: 26px; padding: 42px 30px; }
         .marquee { margin: 36px 0 !important; border-radius: 18px; }
         a.jewel-btn { display: none !important; }
-        @media (prefers-reduced-motion: reduce) { #splash { display: none; } #cursor-glow { display: none; } }
-        @media print { #splash, #cursor-glow, .bg-orb, #scroll-progress, .back-to-top-jewel, .topbar { display: none !important; } body { background: white !important; } }
         .menu a:last-child { margin-left: 0 !important; padding: 8px 12px !important; border-radius: 10px !important; background: transparent !important; color: var(--text) !important; box-shadow: none !important; }
         .menu a:last-child::before { display: none !important; }
         .menu a:last-child:hover { transform: none !important; background: rgba(5,150,105,0.06) !important; color: var(--primary-dark) !important; box-shadow: none !important; }
         .menu a:last-child .nav-ico { background: linear-gradient(145deg, #e9f7ec, #d5ecdd) !important; border: 1px solid var(--border-soft) !important; box-shadow: inset 0 1px 1px rgba(255,255,255,0.8), 0 2px 4px rgba(3,37,31,0.08) !important; }
         .menu a.active { background: transparent !important; color: var(--primary-dark) !important; box-shadow: none !important; }
+        @media (prefers-reduced-motion: reduce) { #splash { display: none; } #cursor-glow { display: none; } }
+        @media print { #splash, #cursor-glow, .bg-orb, #scroll-progress, .back-to-top-jewel, .topbar { display: none !important; } body { background: white !important; } }
     </style>
 </head>
 <body id="top">
@@ -257,27 +241,27 @@ $__pageTitle = $title ?? ($brand . ' — Lembaga Penelitian & Pengabdian');
 <div class="bg-orb bg-orb-2" aria-hidden="true"></div>
 <div id="scroll-progress"></div>
 
-<!-- TOPBAR -->
+<!-- ================= TOPBAR ================= -->
 <header class="topbar">
     <div class="container topbar-inner">
+
         <a href="<?= e(url('public/index.php?page=home')) ?>" class="brand">
             <?php if (!empty($s['logo_path'])): ?>
                 <img class="site-logo" src="<?= e(upload_url($s['logo_path'])) ?>" alt="Logo <?= e($brand) ?>">
             <?php endif; ?>
-            
-        <?php if ($upcomingCount > 0): ?>
-        <a class="live-ticker" href="<?= e(url('public/index.php?page=agenda')) ?>" title="Lihat agenda kegiatan">
-            <span class="live-ticker-dot"></span>
-            <span class="live-ticker-count"><?= $upcomingCount ?></span>
-            <span class="live-ticker-label">Agenda</span>
-            <span class="live-ticker-text" id="liveTickerText"><?= e($tickerEvents[0]['title'] ?? 'Kegiatan 30 hari ke depan') ?></span>
-            <span class="live-ticker-arrow">→</span>
+            <span class="brand-txt">
+                <b><?= e($brand) ?></b>
+                <span></span>
+            </span>
         </a>
-        <?php endif; ?>
 
         <nav id="main-menu">
             <ul class="menu">
-                <li><a href="<?= e(url('public/index.php?page=home')) ?>"><span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></span>Beranda</a></li>
+                <li>
+                    <a href="<?= e(url('public/index.php?page=home')) ?>" class="<?= $__page === 'home' ? 'active' : '' ?>">
+                        <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></span>Beranda
+                    </a>
+                </li>
 
                 <li class="has-dropdown">
                     <a href="#" class="dropdown-toggle"><span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></span>Tentang</a>
@@ -289,9 +273,23 @@ $__pageTitle = $title ?? ($brand . ' — Lembaga Penelitian & Pengabdian');
                     </div>
                 </li>
 
-                <li><a href="<?= e(url('public/index.php?page=berita')) ?>"><span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"></path><path d="M18 14h-8"></path><path d="M15 18h-5"></path><path d="M10 6h8v4h-8V6Z"></path></svg></span>Berita</a></li>
+                <li>
+                    <a href="<?= e(url('public/index.php?page=berita')) ?>" class="<?= $__page === 'berita' ? 'active' : '' ?>">
+                        <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"></path><path d="M18 14h-8"></path><path d="M15 18h-5"></path><path d="M10 6h8v4h-8V6Z"></path></svg></span>Berita
+                    </a>
+                </li>
 
-                <li><a href="<?= e(url('public/index.php?page=galeri')) ?>"><span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg></span>Galeri</a></li>
+                <li>
+                    <a href="<?= e(url('public/index.php?page=galeri')) ?>" class="<?= $__page === 'galeri' ? 'active' : '' ?>">
+                        <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg></span>Galeri
+                    </a>
+                </li>
+
+                <li>
+                    <a href="<?= e(url('public/index.php?page=dosen')) ?>" class="<?= $__page === 'dosen' ? 'active' : '' ?>">
+                        <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 4L2 9l10 5 10-5-10-5z"></path><path d="M6 11.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-4.5"></path><path d="M22 9v6"></path></svg></span>Dosen
+                    </a>
+                </li>
 
                 <li class="has-dropdown">
                     <a href="#" class="dropdown-toggle"><span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg></span>Catur Dharma</a>
@@ -324,13 +322,25 @@ $__pageTitle = $title ?? ($brand . ' — Lembaga Penelitian & Pengabdian');
                             <?php if ($upcomingCount > 0): ?><span class="dropdown-item-badge"><?= $upcomingCount ?></span><?php endif; ?>
                         </a>
                         <a href="<?= e(url('public/index.php?page=survei')) ?>" class="dropdown-link">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
-    Survei Kepuasan
-</a>
-                        <a href="<?= e(url('public/index.php?page=panduan')) ?>" class="dropdown-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg> Panduan Layanan</a>
-                        <a href="<?= e(url('public/index.php?page=unduhan')) ?>" class="dropdown-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg> Unduhan Dokumen</a>
-                        <a href="<?= e(url('public/index.php?page=hibah')) ?>" class="dropdown-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg> Hibah Aktif</a>
-                        <a href="<?= e(url('public/index.php?page=verifikasi-sertifikat')) ?>" class="dropdown-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 15a7 7 0 1 0 0-14 7 7 0 0 0 0 14Z"></path><path d="M8.2 13.9 7 23l5-3 5 3-1.2-9.1"></path></svg> Verifikasi Sertifikat</a>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+                            Survei Kepuasan
+                        </a>
+                        <a href="<?= e(url('public/index.php?page=panduan')) ?>" class="dropdown-link">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                            Panduan Layanan
+                        </a>
+                        <a href="<?= e(url('public/index.php?page=unduhan')) ?>" class="dropdown-link">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                            Unduhan Dokumen
+                        </a>
+                        <a href="<?= e(url('public/index.php?page=hibah')) ?>" class="dropdown-link">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                            Hibah Aktif
+                        </a>
+                        <a href="<?= e(url('public/index.php?page=verifikasi-sertifikat')) ?>" class="dropdown-link">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 15a7 7 0 1 0 0-14 7 7 0 0 0 0 14Z"></path><path d="M8.2 13.9 7 23l5-3 5 3-1.2-9.1"></path></svg>
+                            Verifikasi Sertifikat
+                        </a>
                         <a href="<?= e(url('public/index.php?page=cek-plagiat')) ?>" class="dropdown-link">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><path d="M8 11h6"></path><path d="M11 8v6"></path></svg>
                             Cek Plagiarisme
@@ -339,7 +349,11 @@ $__pageTitle = $title ?? ($brand . ' — Lembaga Penelitian & Pengabdian');
                     </div>
                 </li>
 
-                <li><a href="<?= e(url('admin/index.php?page=login')) ?>"><span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></span>Login</a></li>
+                <li>
+                    <a href="<?= e(url('admin/index.php?page=login')) ?>">
+                        <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></span>Login
+                    </a>
+                </li>
             </ul>
         </nav>
 
@@ -347,11 +361,12 @@ $__pageTitle = $title ?? ($brand . ' — Lembaga Penelitian & Pengabdian');
     </div>
 </header>
 
+<!-- ================= MAIN ================= -->
 <main class="container main">
     <?= $content ?>
 </main>
 
-<!-- FOOTER -->
+<!-- ================= FOOTER ================= -->
 <footer class="footer">
     <div class="wm-3d" aria-hidden="true">LP3M</div>
     <div aria-hidden="true" style="position: absolute; top: 40px; right: -40px; width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, rgba(217,164,65,0.08), transparent 70%); pointer-events: none;"></div>
@@ -368,7 +383,7 @@ $__pageTitle = $title ?? ($brand . ' — Lembaga Penelitian & Pengabdian');
                 </div>
                 <p style="font-size: 13.5px; line-height: 1.75; color: rgba(255,255,255,0.78); margin-bottom: 18px;">
                     Lembaga Penelitian, Pengabdian kepada Masyarakat, dan Al-Islam Kemuhammadiyahan
-                    <strong style="color: #f2c063;">Universitas Muhammadiyah Gorontalo</strong>.
+                    <strong style="color: #f2c063;">Universitas Muhammadiyah Maumere</strong>.
                 </p>
                 <p style="font-size: 11px; font-weight: 800; letter-spacing: 0.18em; color: #f2c063; margin-bottom: 10px;">IKUTI KAMI</p>
                 <div style="display: flex; gap: 10px;" id="soc-row">
@@ -423,6 +438,18 @@ $__pageTitle = $title ?? ($brand . ' — Lembaga Penelitian & Pengabdian');
             </div>
         </div>
 
+        <div style="margin:34px 0 0; padding:26px 28px; border-radius:20px; background:linear-gradient(135deg,rgba(217,164,65,.16),rgba(217,164,65,.05)); border:1px solid rgba(217,164,65,.35); display:flex; gap:18px; align-items:center; flex-wrap:wrap;">
+            <div style="flex:1; min-width:220px;">
+                <div style="font-family:var(--font-display); font-weight:900; font-size:17px; color:#fff; margin-bottom:4px;">📬 Langganan Info LP3M</div>
+                <div style="font-size:12.5px; color:rgba(255,255,255,.75);">Pengumuman hibah, kegiatan, dan publikasi terbaru langsung ke email Anda.</div>
+            </div>
+            <form method="post" action="<?= e(url('public/index.php?page=subscribe')) ?>" style="display:flex; gap:8px; flex-wrap:wrap;">
+                <?= csrf_field() ?>
+                <input type="email" name="email" required placeholder="email@anda.ac.id" style="padding:12px 16px; border-radius:12px; border:1px solid rgba(255,255,255,.3); background:rgba(255,255,255,.12); color:#fff; min-width:220px; font-size:13px; outline:none;">
+                <button type="submit" style="padding:12px 20px; border:none; border-radius:12px; font-weight:800; cursor:pointer; background:linear-gradient(145deg,#fde68a,#d9a441); color:#03251f; box-shadow:0 5px 14px rgba(217,164,65,.35);">Berlangganan</button>
+            </form>
+        </div>
+
         <div style="border-top: 1px solid rgba(255,255,255,0.1); padding: 22px 0; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
             <p style="font-size: 13px; color: rgba(255,255,255,0.6); margin:0;"><?= $footerLine ?></p>
             <p style="font-size: 12px; color: rgba(255,255,255,0.5); margin:0;">⚡ <span style="color: #f2c063; font-weight: 700;">Fastabiqul Khairat</span></p>
@@ -431,6 +458,7 @@ $__pageTitle = $title ?? ($brand . ' — Lembaga Penelitian & Pengabdian');
 </footer>
 
 <script src="<?= e(url('public/assets/js/public.js')) ?>"></script>
+<?php include BASE_PATH . '/resources/views/partials/chatbot-widget.php'; ?>
 
 <script>
 (function () {
@@ -451,7 +479,7 @@ $__pageTitle = $title ?? ($brand . ' — Lembaga Penelitian & Pengabdian');
         setTimeout(kill, 3000);
     }
 
-    // Cursor glow
+    // Cursor glow & orbs parallax
     if (finePointer && !reduced) {
         var glow = document.getElementById('cursor-glow');
         var orb1 = document.querySelector('.bg-orb-1');
@@ -473,24 +501,7 @@ $__pageTitle = $title ?? ($brand . ' — Lembaga Penelitian & Pengabdian');
         }, { passive: true });
     }
 
-    // 🆕 Ticker rotator
-    var tickerEl = document.getElementById('liveTickerText');
-    if (tickerEl) {
-        var items = <?= json_encode(array_map(function ($t) { return $t['title'] . ' · ' . date('d M', strtotime($t['start_date'])); }, $tickerEvents), JSON_UNESCAPED_UNICODE) ?>;
-        if (items.length > 1) {
-            var ti = 0;
-            setInterval(function () {
-                tickerEl.classList.add('swap');
-                setTimeout(function () {
-                    ti = (ti + 1) % items.length;
-                    tickerEl.textContent = items[ti];
-                    tickerEl.classList.remove('swap');
-                }, 350);
-            }, 3800);
-        }
-    }
-
-    // Mobile menu
+    // Mobile menu + dropdown accordion
     var toggleBtn = document.getElementById('menu-toggle');
     var menu = document.getElementById('main-menu');
     if (toggleBtn && menu) {
@@ -517,7 +528,7 @@ $__pageTitle = $title ?? ($brand . ' — Lembaga Penelitian & Pengabdian');
         io.observe(document.getElementById('soc-row'));
     }
 
-    // Konami
+    // Konami code easter egg
     var seq = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
     var pos = 0;
     document.addEventListener('keydown', function (e) {
@@ -525,7 +536,7 @@ $__pageTitle = $title ?? ($brand . ' — Lembaga Penelitian & Pengabdian');
             pos++;
             if (pos === seq.length) {
                 pos = 0;
-                var emojis = ['✨','🌟','💫','⭐','🎉','🕌','💎'];
+                var emojis = ['✨','🌟','','⭐','','🕌',''];
                 for (var i = 0; i < 30; i++) {
                     (function (j) {
                         setTimeout(function () {
