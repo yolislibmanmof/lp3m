@@ -39,7 +39,7 @@ require BASE_PATH . '/app/Core/Crud.php';
 require BASE_PATH . '/app/Core/TextExtractor.php';
 
 // ============================================
-// MODELS
+// MODELS — MODUL INTI (dari GitHub)
 // ============================================
 require BASE_PATH . '/app/Models/News.php';
 require BASE_PATH . '/app/Models/Setting.php';
@@ -67,7 +67,20 @@ require BASE_PATH . '/app/Models/Maintenance.php';
 require BASE_PATH . '/app/Models/BackupManager.php';
 
 // ============================================
-// CONTROLLERS
+// MODELS — FITUR BARU (Chatbot · Dosen · Newsletter · Integrasi)
+// ============================================
+require BASE_PATH . '/app/Models/Chatbot.php';
+require BASE_PATH . '/app/Models/DosenResolver.php';
+require BASE_PATH . '/app/Models/MailSender.php';
+require BASE_PATH . '/app/Models/Subscriber.php';
+require BASE_PATH . '/app/Models/Broadcast.php';
+require BASE_PATH . '/app/Models/IntegrationsLog.php';
+require BASE_PATH . '/app/Models/IntegrationsDoi.php';
+require BASE_PATH . '/app/Models/IntegrationsSinta.php';
+require BASE_PATH . '/app/Models/IntegrationsScholar.php';
+
+// ============================================
+// CONTROLLERS — MODUL INTI (dari GitHub)
 // ============================================
 require BASE_PATH . '/app/Controllers/PublicNews.php';
 require BASE_PATH . '/app/Controllers/AdminNews.php';
@@ -97,8 +110,18 @@ require BASE_PATH . '/app/Controllers/AdminUser.php';
 require BASE_PATH . '/app/Controllers/AdminAuditLog.php';
 require BASE_PATH . '/app/Controllers/AdminReport.php';
 require BASE_PATH . '/app/Controllers/AdminSurvey.php';
-require BASE_PATH . '/app/Controllers/PublicSurvey.php';
 require BASE_PATH . '/app/Controllers/AdminBackup.php';
+
+// ============================================
+// CONTROLLERS — FITUR BARU (Chatbot · Dosen · Newsletter · Integrasi)
+// ============================================
+require BASE_PATH . '/app/Controllers/ApiChatbot.php';
+require BASE_PATH . '/app/Controllers/AdminChatbot.php';
+require BASE_PATH . '/app/Controllers/PublicDosen.php';
+require BASE_PATH . '/app/Controllers/AdminProfile.php';
+require BASE_PATH . '/app/Controllers/AdminIntegrations.php';
+require BASE_PATH . '/app/Controllers/AdminBroadcast.php';
+require BASE_PATH . '/app/Controllers/PublicSubscribe.php';
 
 // ============================================
 // GLOBAL HELPERS
