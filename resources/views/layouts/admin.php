@@ -189,6 +189,9 @@ $pageTitles = [
     'chatbot'                 => 'Dashboard chatbot Siti',
     'chatbot-knowledge'       => 'Kelola knowledge base',
     'chatbot-config'          => 'Konfigurasi AI Siti',
+    'video'        => 'Kelola galeri video lembaga',
+    'video-tambah' => 'Tambah video baru',
+    'video-edit'   => 'Edit video',
 ];
 
 $pageSub   = $pageTitles[$currentPage] ?? '';
@@ -230,6 +233,11 @@ $firstName = explode(' ', trim($adminName))[0] ?? 'Admin';
             <a href="<?= e(url('admin/index.php?page=galeri')) ?>" class="<?= $currentPage === 'galeri' ? 'active' : '' ?>">
                 <span class="ico-3d ico-3d-purple">🖼️</span><span>Galeri Kegiatan</span>
                 <span class="jewel-badge jewel-gold"><?= $cntGaleri ?></span>
+            </a>
+
+            <a href="<?= e(url('admin/index.php?page=video')) ?>" class="<?= strpos($currentPage, 'video') === 0 ? 'active' : '' ?>">
+                <span class="ico-3d ico-3d-purple">🎥</span><span>Galeri Video</span>
+                <span class="jewel-badge jewel-gold"><?= (int) $db->query('SELECT COUNT(*) FROM videos')->fetchColumn() ?></span>
             </a>
 
             <span class="menu-label-3d">Catur Dharma</span>

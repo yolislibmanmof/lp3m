@@ -502,6 +502,15 @@ switch ($page) {
         AdminIntegrations::exportLog();
         break;
 
+    // ── Galeri Video ───────────────────────────────────────
+    case 'video':          AdminVideo::index(); break;
+    case 'video-tambah':   AdminVideo::create(); break;
+    case 'video-simpan':   AdminVideo::store(); break;
+    case 'video-edit':     AdminVideo::edit((int) ($_GET['id'] ?? 0)); break;
+    case 'video-update':   AdminVideo::update(); break;
+    case 'video-hapus':    AdminVideo::destroy(); break;
+    case 'video-toggle':   AdminVideo::toggle(); break;
+
     // ── Chatbot API (endpoint publik & admin) ──────────────
     case 'chatbot-api':
         ApiChatbot::reply();

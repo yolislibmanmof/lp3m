@@ -78,9 +78,11 @@ require BASE_PATH . '/app/Models/IntegrationsLog.php';
 require BASE_PATH . '/app/Models/IntegrationsDoi.php';
 require BASE_PATH . '/app/Models/IntegrationsSinta.php';
 require BASE_PATH . '/app/Models/IntegrationsScholar.php';
+require BASE_PATH . '/app/Models/Video.php';
+require BASE_PATH . '/app/Models/Podcast.php';
 
 // ============================================
-// CONTROLLERS — MODUL INTI (dari GitHub)
+// CONTROLLERS — MODUL INTI
 // ============================================
 require BASE_PATH . '/app/Controllers/PublicNews.php';
 require BASE_PATH . '/app/Controllers/AdminNews.php';
@@ -111,6 +113,7 @@ require BASE_PATH . '/app/Controllers/AdminAuditLog.php';
 require BASE_PATH . '/app/Controllers/AdminReport.php';
 require BASE_PATH . '/app/Controllers/AdminSurvey.php';
 require BASE_PATH . '/app/Controllers/AdminBackup.php';
+require BASE_PATH . '/app/Controllers/AdminVideo.php';
 
 // ============================================
 // CONTROLLERS — FITUR BARU (Chatbot · Dosen · Newsletter · Integrasi)
