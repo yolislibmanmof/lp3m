@@ -1,9 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Plus+Jakarta+Sans:wght@600;700;800;900&display=swap');
 
 /* ==========================================================
-   LP3M UNIMOF — ELEVATE 3D EDITION
-   "Sage Aurora" Design System — FINAL CONSOLIDATED
-   Merge: base + doc + news + settings + wow + performance
+   LP3M UNIMOF — SUPER PREMIUM ULTIMATE EDITION
+   "Sage Aurora" Design System — ENHANCED
+   Premium Glassmorphism + Realistic Icons + Full-Page Hero
    ========================================================== */
 
 :root {
@@ -36,12 +36,15 @@
     --font-body: 'Inter', 'Segoe UI', sans-serif;
 
     --glass: rgba(186, 224, 201, 0.97);
+    --glass-premium: rgba(255, 255, 255, 0.08);
     --ring: rgba(5, 150, 105, 0.35);
     --shadow-sm: 0 2px 8px rgba(3, 37, 31, 0.06);
     --shadow-md: 0 14px 34px rgba(3, 37, 31, 0.10);
     --shadow-lg: 0 24px 54px rgba(3, 37, 31, 0.14);
+    --shadow-xl: 0 32px 64px rgba(3, 37, 31, 0.18);
     --shadow-gold: 0 8px 20px rgba(217, 164, 65, 0.25);
     --shadow-emerald: 0 8px 20px rgba(5, 150, 105, 0.25);
+    --shadow-premium: 0 20px 50px rgba(3, 37, 31, 0.20);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -58,7 +61,7 @@ html, body { overflow-x: clip; }
 }
 
 /* ==========================================================
-   BODY — SAGE AURORA (TANPA NOISE, TANPA AURORA SHIFT)
+   BODY — SAGE AURORA PREMIUM
    ========================================================== */
 body {
     font-family: var(--font-body);
@@ -67,16 +70,13 @@ body {
         radial-gradient(950px 480px at -8% 28%, rgba(217, 164, 65, 0.24), transparent 58%),
         radial-gradient(800px 800px at 50% 110%, rgba(13, 148, 136, 0.18), transparent 70%),
         linear-gradient(180deg, #9fd2b6 0%, #c0e0cb 45%, #a9d6c0 100%);
-    background-attachment: fixed;
+    background-attachment: scroll;
     color: var(--text);
     line-height: 1.65;
     -webkit-font-smoothing: antialiased;
     min-height: 100vh;
     position: relative;
 }
-
-/* NOISE TEXTURE — DIMATIKAN (sangat berat) */
-/* body::before removed for performance */
 
 h1, h2, h3, h4, h5, h6 { font-family: var(--font-display); }
 a { text-decoration: none; color: inherit; }
@@ -88,7 +88,7 @@ a { text-decoration: none; color: inherit; }
 }
 
 /* ==========================================================
-   SCROLLBAR (STATIC, tanpa animation)
+   SCROLLBAR PREMIUM
    ========================================================== */
 ::-webkit-scrollbar { width: 10px; }
 ::-webkit-scrollbar-track { background: rgba(164, 205, 180, 0.4); }
@@ -124,7 +124,7 @@ body.menu-open { overflow: hidden; }
 .section--lavender { background: linear-gradient(180deg, transparent, var(--surface-lavender) 15%, var(--surface-lavender) 85%, transparent); }
 
 /* ==========================================================
-   EYEBROW & GOLD TEXT (STATIC, tanpa flow animation)
+   EYEBROW & GOLD TEXT
    ========================================================== */
 .eyebrow {
     display: inline-flex; align-items: center; gap: 10px;
@@ -163,7 +163,7 @@ body.menu-open { overflow: hidden; }
 .stagger-6 { transition-delay: 0.36s; }
 
 /* ==========================================================
-   TOPBAR — FIX PRESISI LURUS (NO WRAP)
+   TOPBAR PREMIUM
    ========================================================== */
 .topbar {
     position: sticky; top: 0; z-index: 999;
@@ -181,7 +181,7 @@ body.menu-open { overflow: hidden; }
 
 .topbar-inner {
     display: flex; 
-    align-items: center; /* PAKSA TENGAH VERTIKAL */
+    align-items: center;
     justify-content: space-between;
     gap: 16px; 
     padding: 12px 0;
@@ -192,11 +192,6 @@ body.menu-open { overflow: hidden; }
     font-family: var(--font-display); font-size: 18px; font-weight: 900;
     letter-spacing: -0.02em; color: var(--ink);
 }
-.brand::after {
-    content: ''; width: 9px; height: 9px; border-radius: 50%;
-    background: radial-gradient(circle at 30% 30%, #fde68a, #d9a441);
-    box-shadow: 0 0 0 4px var(--gold-soft), 0 0 10px rgba(217, 164, 65, 0.6);
-}
 
 .site-logo {
     height: 38px; width: auto; border-radius: 10px;
@@ -205,12 +200,12 @@ body.menu-open { overflow: hidden; }
 }
 .site-logo:hover { transform: scale(1.05) rotate(-3deg); }
 
-/* FIX NAVBAR: NOWRAP + ALIGN CENTER */
+/* NAVBAR PREMIUM */
 .menu { 
     display: flex; 
-    align-items: center; /* PAKSA SEGARIS */
+    align-items: center;
     gap: 4px; 
-    flex-wrap: nowrap; /* JANGAN LIPAT */
+    flex-wrap: nowrap;
 }
 .menu a {
     position: relative; padding: 8px 10px;
@@ -218,7 +213,7 @@ body.menu-open { overflow: hidden; }
     transition: all 0.25s ease;
     display: inline-flex; align-items: center; gap: 6px;
     border-radius: 10px;
-    white-space: nowrap; /* TEKST JANGAN TURUN */
+    white-space: nowrap;
 }
 .menu a::after {
     content: ''; position: absolute;
@@ -269,7 +264,7 @@ body.menu-open { overflow: hidden; }
     border-color: var(--gold);
 }
 
-/* NAV-ICO (FIXED 32x32) */
+/* NAV-ICO PREMIUM (SVG Support) */
 .nav-ico {
     display: inline-flex; align-items: center; justify-content: center;
     width: 32px; height: 32px; min-width: 32px; min-height: 32px;
@@ -280,11 +275,21 @@ body.menu-open { overflow: hidden; }
     transition: all 0.25s cubic-bezier(0.16,1,0.3,1);
     flex-shrink: 0;
 }
+.nav-ico svg {
+    width: 18px;
+    height: 18px;
+    stroke-width: 2.2;
+    transition: all 0.25s ease;
+}
 .menu a:hover .nav-ico, .menu a.active .nav-ico {
     background: linear-gradient(145deg, #6ee7b7, #34d399 50%, #10b981);
     border-color: rgba(5, 150, 105, 0.4);
     box-shadow: inset 0 1px 2px rgba(255,255,255,0.6), inset 0 -2px 3px rgba(0,0,0,0.15), 0 4px 10px rgba(5, 150, 105, 0.3);
     transform: translateY(-1px) scale(1.05);
+}
+.menu a:hover .nav-ico svg, .menu a.active .nav-ico svg {
+    stroke: white;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
 }
 .menu a:last-child .nav-ico {
     background: linear-gradient(145deg, #065f46, #03251f);
@@ -304,7 +309,6 @@ body.menu-open { overflow: hidden; }
     box-shadow: var(--shadow-lg);
 }
 
-/* Islamic pattern — STATIC (animation dimatikan) */
 .hero::before {
     content: ''; position: absolute; inset: 0; z-index: 0;
     background-image:
@@ -312,7 +316,6 @@ body.menu-open { overflow: hidden; }
         repeating-linear-gradient(-45deg, transparent, transparent 30px, rgba(217,164,65,0.04) 30px, rgba(217,164,65,0.04) 31px);
     pointer-events: none;
 }
-/* Orbs glow — STATIC */
 .hero::after {
     content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
     background:
@@ -330,7 +333,7 @@ body.menu-open { overflow: hidden; }
 .hero-actions { margin-top: 28px; display: flex; gap: 12px; flex-wrap: wrap; }
 
 /* ==========================================================
-   BUTTONS
+   BUTTONS PREMIUM
    ========================================================== */
 .btn {
     position: relative; overflow: hidden; isolation: isolate;
@@ -371,7 +374,7 @@ body.menu-open { overflow: hidden; }
 }
 
 /* ==========================================================
-   SECTIONS & CARDS (TANPA BACKDROP-FILTER, TANPA ANIMATED BORDER)
+   SECTIONS & CARDS PREMIUM
    ========================================================== */
 .section h2 {
     position: relative; padding-bottom: 14px; margin-bottom: 22px;
@@ -411,13 +414,13 @@ body.menu-open { overflow: hidden; }
 }
 .card p { color: var(--muted); font-size: 14px; line-height: 1.6; position: relative; z-index: 1; }
 
-/* Card hover — simplified shadow */
 .card:hover, .mod-card:hover, .news-card:hover, .doc-row:hover, .feed-3d:hover {
     transform: translateY(-6px);
     box-shadow: 0 20px 40px rgba(3, 37, 31, 0.15), 0 0 0 1px rgba(5, 150, 105, 0.15);
     border-color: rgba(5, 150, 105, 0.3);
 }
 
+/* CARD ICON PREMIUM (SVG Support) */
 .card-icon {
     display: flex; align-items: center; justify-content: center;
     width: 52px; height: 52px; margin-bottom: 16px;
@@ -427,6 +430,12 @@ body.menu-open { overflow: hidden; }
     box-shadow: inset 0 2px 3px rgba(255,255,255,0.7), inset 0 -3px 4px rgba(0,0,0,0.2), 0 6px 14px rgba(217, 164, 65, 0.35);
     transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
+.card-icon svg {
+    width: 24px;
+    height: 24px;
+    stroke-width: 2.2;
+    transition: all 0.3s ease;
+}
 .card-icon::before {
     content: ''; position: absolute; top: 5px; left: 10px;
     width: 16px; height: 7px; border-radius: 50%;
@@ -434,9 +443,12 @@ body.menu-open { overflow: hidden; }
     pointer-events: none;
 }
 .card:hover .card-icon { transform: scale(1.1) rotate(-6deg); }
+.card:hover .card-icon svg {
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
 
 /* ==========================================================
-   STATS COUNTER (STATIC, tanpa glow animation)
+   STATS COUNTER PREMIUM
    ========================================================== */
 .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin: 28px 0; }
 .stat {
@@ -504,7 +516,7 @@ body.menu-open { overflow: hidden; }
 }
 
 /* ==========================================================
-   FOOTER + WATERMARK
+   FOOTER PREMIUM
    ========================================================== */
 .footer {
     position: relative; margin-top: 64px; padding: 50px 0 30px;
@@ -560,6 +572,7 @@ body.menu-open { overflow: hidden; }
 .doc-row:hover::after { opacity: 1; }
 .doc-row:hover .doc-icon { transform: scale(1.08) rotate(-4deg); }
 
+/* DOC ICON PREMIUM (SVG Support) */
 .doc-icon {
     display: flex; align-items: center; justify-content: center;
     width: 54px; height: 54px; border-radius: 16px;
@@ -570,14 +583,22 @@ body.menu-open { overflow: hidden; }
     box-shadow: inset 0 2px 3px rgba(255,255,255,0.6), inset 0 -3px 4px rgba(0,0,0,0.25), 0 6px 14px rgba(5, 150, 105, 0.35);
     transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
+.doc-icon svg {
+    width: 24px;
+    height: 24px;
+    stroke-width: 2.2;
+    transition: all 0.3s ease;
+}
 .doc-icon::before {
     content: ''; position: absolute; top: 5px; left: 10px;
     width: 16px; height: 7px; border-radius: 50%;
     background: rgba(255,255,255,0.65); filter: blur(1.5px);
     pointer-events: none;
 }
+.doc-row:hover .doc-icon svg {
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
 
-/* File type orbs */
 .doc-row.type-pdf .doc-icon { background: radial-gradient(circle at 30% 25%, rgba(255,255,255,0.5), transparent 40%), linear-gradient(145deg, #fca5a5, #dc2626 60%, #991b1b); }
 .doc-row.type-doc .doc-icon, .doc-row.type-docx .doc-icon { background: radial-gradient(circle at 30% 25%, rgba(255,255,255,0.5), transparent 40%), linear-gradient(145deg, #93c5fd, #2563eb 60%, #1e3a8a); }
 .doc-row.type-xls .doc-icon, .doc-row.type-xlsx .doc-icon { background: radial-gradient(circle at 30% 25%, rgba(255,255,255,0.5), transparent 40%), linear-gradient(145deg, #86efac, #16a34a 60%, #14532d); }
@@ -609,7 +630,6 @@ body.menu-open { overflow: hidden; }
     transform: translateY(-2px);
     box-shadow: inset 0 2px 3px rgba(255,255,255,0.8), inset 0 -2px 3px rgba(0,0,0,0.15), 0 14px 30px rgba(217, 164, 65, 0.55);
 }
-.doc-download .dl-ico { font-size: 14px; font-weight: 900; }
 
 /* ==========================================================
    MODUL: BERITA
@@ -829,7 +849,7 @@ body.menu-open { overflow: hidden; }
 }
 
 /* ==========================================================
-   WOW: CTA BAND, MOD ICON, HERO CHIPS (simplified)
+   WOW: CTA BAND, MOD ICON, HERO CHIPS
    ========================================================== */
 .cta-band {
     position: relative; overflow: hidden; isolation: isolate;
@@ -977,17 +997,6 @@ a.card:hover { transform: translateY(-4px); }
 }
 
 /* ==========================================================
-   PERFORMANCE BOOST — Matikan animasi saat scroll
-   ========================================================== */
-body.is-scrolling *,
-body.is-scrolling *::before,
-body.is-scrolling *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-}
-body.is-scrolling .marquee-track { animation-play-state: paused !important; }
-
-/* ==========================================================
    PERFORMANCE OPTIMIZATION
    ========================================================== */
 .section, .stats, .marquee, .cta-band {
@@ -998,17 +1007,12 @@ body.is-scrolling .marquee-track { animation-play-state: paused !important; }
     contain: layout style paint;
 }
 
-/* Hide static back-to-top (duplikat) */
 a.jewel-btn { display: none !important; }
 
-/* Fix hero chips position */
 .hero-chip { position: absolute !important; }
 .hero-chip.c1 { top: 18% !important; right: 6% !important; left: auto !important; bottom: auto !important; }
 .hero-chip.c2 { top: auto !important; bottom: 16% !important; right: 14% !important; left: auto !important; }
 
-/* ==========================================================
-   REDUCED MOTION
-   ========================================================== */
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
         animation-duration: 0.01ms !important;
@@ -1019,9 +1023,6 @@ a.jewel-btn { display: none !important; }
     .reveal { opacity: 1; transform: none; }
 }
 
-/* ==========================================================
-   PRINT
-   ========================================================== */
 @media print {
     body { background: white !important; }
     .topbar, .back-to-top-jewel, .share-floating { display: none !important; }
@@ -1030,24 +1031,18 @@ a.jewel-btn { display: none !important; }
 
 /* ==========================================================
    ★★★ FINAL PERFORMANCE PATCH — WAJIB ★★★
-   Fix untuk scroll berat di mobile & desktop
    ========================================================== */
 
-/* 1. HAPUS background-attachment: fixed (PENYEBAB UTAMA scroll berat!)
-   Setiap scroll, browser harus repaint seluruh viewport dengan gradient
-   kompleks. Diganti dengan "scroll" yang jauh lebih ringan. */
 html, body {
     background-attachment: scroll !important;
 }
 
-/* 2. MATIKAN backdrop-filter di topbar (sangat berat di GPU) */
 .topbar,
 .topbar.scrolled {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
 }
 
-/* 3. Topbar: gunakan solid background untuk performa */
 .topbar {
     background: rgba(186, 224, 201, 0.97) !important;
 }
@@ -1056,7 +1051,6 @@ html, body {
     box-shadow: 0 4px 20px rgba(3, 37, 31, 0.08);
 }
 
-/* 4. Matikan animasi continuous yang tidak perlu */
 .wm-3d {
     animation: none !important;
 }
@@ -1070,36 +1064,30 @@ html, body {
     animation: none !important;
 }
 
-/* 5. Matikan filter drop-shadow pada watermark */
 .footer .wm-3d {
     filter: none !important;
     -webkit-text-stroke: 1.5px rgba(242, 192, 99, 0.15);
     text-shadow: 0 2px 0 rgba(0, 0, 0, 0.25), 0 8px 20px rgba(217, 164, 65, 0.2);
 }
 
-/* 6. Optimasi transform & will-change */
 .card, .news-card, .mod-card, .doc-row {
     will-change: auto;
     transform: translateZ(0);
 }
 
-/* 7. Simplify hover shadow */
 .card:hover, .news-card:hover, .mod-card:hover, .doc-row:hover {
     box-shadow: 0 10px 30px rgba(3, 37, 31, 0.12);
 }
 
-/* 8. Matikan animasi bg-orb saat scroll (mengurangi repaint) */
 body.is-scrolling .bg-orb,
 body.is-scrolling .wm-3d {
     animation-play-state: paused !important;
 }
 
-/* 9. Hero chips tanpa animation */
 .hero-chip {
     animation: none !important;
 }
 
-/* 10. Mobile optimization: matikan semua animasi berat */
 @media (max-width: 768px) {
     .bg-orb { display: none !important; }
     .hero-chip { display: none !important; }
@@ -1107,7 +1095,6 @@ body.is-scrolling .wm-3d {
     .menu a:hover .nav-ico { animation: none !important; }
 }
 
-/* 11. Print friendly */
 @media print {
     .topbar, .back-to-top-jewel, .share-floating, .bg-orb, #scroll-progress {
         display: none !important;
@@ -1115,7 +1102,6 @@ body.is-scrolling .wm-3d {
     body { background: white !important; }
 }
 
-/* 12. Reduced motion: matikan semua animasi */
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
         animation-duration: 0.01ms !important;
@@ -1124,10 +1110,6 @@ body.is-scrolling .wm-3d {
     }
 }
 
-/* ==========================================================
-   PATCH LIST-VIRTUALIZATION (halaman panjang jadi ringan)
-   Browser skip render card yang di luar layar
-   ========================================================== */
 .news-card, .doc-row, .mod-card, .org-card, .feed-3d {
     content-visibility: auto;
     contain-intrinsic-size: auto 240px;
@@ -1137,29 +1119,21 @@ body.is-scrolling .wm-3d {
     contain: layout style;
 }
 
-/* GPU hint hanya untuk gambar yang di-hover */
 .news-card img {
     will-change: transform;
     backface-visibility: hidden;
 }
 
-/* Matikan animasi glow berkelanjutan pada elemen besar */
 .aik-hero::after, .news-hero::after, .hero::after {
     animation: none !important;
 }
 
-/* ==========================================================
-   PATCH BERITA + AIK: Matikan animasi yang bikin berat
-   ========================================================== */
-
-/* 1. Hilangkan backdrop-filter di ticker (PENYEBAB utama scroll berat) */
 .news-ticker-3d {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
     background: rgba(16, 185, 129, 0.85) !important;
 }
 
-/* 2. Matikan animasi shine 3D (running terus di setiap button!) */
 .news-featured-cta-3d::after,
 .news-cta-3d::after,
 .aik-cta-3d::after {
@@ -1167,7 +1141,6 @@ body.is-scrolling .wm-3d {
     display: none !important;
 }
 
-/* 3. Matikan pulse/glow infinite di AIK */
 .crescent-3d,
 .quran-arabic-3d,
 .dua-arabic-3d,
@@ -1178,16 +1151,13 @@ body.is-scrolling .wm-3d {
     animation: none !important;
 }
 
-/* 4. Matikan floating orb animation (3 orb di AIK = 3 repaint/s) */
 .aik-orb-1, .aik-orb-2, .aik-orb-3,
 .news-orb-1, .news-orb-2 {
     animation: none !important;
 }
 
-/* 5. Matikan spin infinite */
 @keyframes aikSpin { from { transform: rotate(0); } to { transform: rotate(0); } }
 
-/* 6. Ornamen glow hanya saat hover (bukan terus-menerus) */
 .aik-orb, .news-orb {
     opacity: 0.5;
     transition: opacity 0.3s ease;
@@ -1197,13 +1167,11 @@ body.is-scrolling .wm-3d {
     opacity: 0.8;
 }
 
-/* 7. Mobile: sembunyikan orb (mobile GPU lemah) */
 @media (max-width: 768px) {
     .aik-orb, .news-orb { display: none !important; }
     .crescent-3d { filter: none !important; }
 }
 
-/* 8. Lazy image untuk gambar berita */
 .news-featured-3d img,
 .news-card img,
 .aik-mod-card-3d img {

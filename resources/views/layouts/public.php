@@ -58,6 +58,47 @@ $__desc      = $seoDescription ?? ($__descMap[$__page] ?? ('Informasi resmi ' . 
 $__canonical = ($__page === 'home') ? url('public/index.php') : url('public/index.php?page=' . $__page);
 $__ogImage   = !empty($s['logo_path']) ? upload_url($s['logo_path']) : url('public/assets/img/favicon.svg');
 $__pageTitle = $title ?? ($brand . ' — Lembaga Penelitian & Pengabdian');
+
+// ICON HELPER FUNCTION (untuk layout)
+function renderLayoutIcon($name, $size = 24, $color = 'currentColor') {
+    $icons = [
+        'home' => '<svg xmlns="http://www.w3.org/2000/svg" width="'.$size.'" height="'.$size.'" fill="none" stroke="'.$color.'" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>',
+        'info' => '<svg xmlns="http://www.w3.org/2000/svg" width="'.$size.'" height="'.$size.'" fill="none" stroke="'.$color.'" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>',
+        'user' => '<svg xmlns="http://www.w3.org/2000/svg" width="'.$size.'" height="'.$size.'" fill="none" stroke="'.$color.'" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>',
+        'eye' => '<svg xmlns="http://www.w3.org/2000/svg" width="'.$size.'" height="'.$size.'" fill="none" stroke="'.$color.'" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>',
+        'grid' => '<svg xmlns="http://www.w3.org/2000/svg" width="'.$size.'" height="'.$size.'" fill="none" stroke="'.$color.'" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>',
+        'message-circle' => '<svg xmlns="http://www.w3.org/2000/svg" width="'.$size.'" height="'.$size.'" fill="none" stroke="'.$color.'" stroke-width="2" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>',
+        'newspaper' => '<svg xmlns="http://www.w3.org/2000/svg" width="'.$size.'" height="'.$size.'" fill="none" stroke="'.$color.'" stroke-width="2" viewBox="0 0 24 24"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"></path><path d="M18 14h-8"></path><path d="M15 18h-5"></path><path d="M10 6h8v4h-8V6Z"></path></svg>',
+        'image' => '<svg xmlns="http://www.w3.org/2000/svg" width="'.$size.'" height="'.$size.'" fill="none" stroke="'.$color.'" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>',
+        'video' => '<svg xmlns="http://www.w3.org/2000/svg" width="'.$size.'" height="'.$size.'" fill="none" stroke="'.$color.'" stroke-width="2" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>',
+        'mic' => '<svg xmlns="http://www.w3.org/2000/svg" width="'.$size.'" height="'.$size.'" fill="none" stroke="'.$color.'" stroke-width="2" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>',
+        'graduation-cap' => '<svg xmlns="http://www.w3.org/2000/svg" width="'.$size.'" height="'.$size.'" fill="none" stroke="'.$color.'" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4L2 9l10 5 10-5-10-5z"></path><path d="M6 11.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-4.5"></path><path d="M22 9v6"></path></svg>',
+        'award' => '<svg xmlns="http://www.w3.org/2000/svg" width="'.$size.'" height="'.$size.'" fill="none" stroke="'.$color.'" stroke-width="2" viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>',
+        'microscope' => '<svg xmlns="http://www.w3.org/2000/svg" width="'.$size.'" height="'.$size.'" fill="none" stroke="'.$color.'" stroke-width="2" viewBox="0 0 24 24"><path d="M9 3h6v2H9V3zm-3 4h12v2H6V7zm2 4h8v10H8V11z"></path><path d="M10 15h4"></path></svg>',
+        'handshake' => '<svg xmlns="http://www.w3.org/2000/svg" width="'.$size.'" height="'.$size.'" fill="none" stroke="'.$color.'" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>',
+        'book' => '<svg xmlns="http://www.w3.org/2000/svg" width="'.$size.'" height="'.$size.'" fill="none" stroke="'.$color.'" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>',
+        'mosque' => '<svg xmlns="http://www.w3.org/2000/svg" width="'.$size.'" height="'.$size.'" fill="none" stroke="'.$color.'" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"></path><path d="M12 6v6l4 2"></path></svg>',
+        'calendar' => '<svg xmlns="http://www.w3.org/2000/svg" width="'.$size.'" height="'.$size.'" fill="none" stroke="'.$color.'" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>',
+        'check-square' => '<svg xmlns="http://www.w3.org/2000/svg" width="'.$size.'" height="'.$size.'" fill="none" stroke="'.$color.'" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>',
+        'book-open' => '<svg xmlns="http://www.w3.org/2000/svg" width="'.$size.'" height="'.$size.'" fill="none" stroke="'.$color.'" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>',
+        'download' => '<svg xmlns="http://www.w3.org/2000/svg" width="'.$size.'" height="'.$size.'" fill="none" stroke="'.$color.'" stroke-width="2" viewBox="0 0 24 24"><path d="M22 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>',
+        'file-text' => '<svg xmlns="http://www.w3.org/2000/svg" width="'.$size.'" height="'.$size.'" fill="none" stroke="'.$color.'" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>',
+        'dollar-sign' => '<svg xmlns="http://www.w3.org/2000/svg" width="'.$size.'" height="'.$size.'" fill="none" stroke="'.$color.'" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>',
+        'award-check' => '<svg xmlns="http://www.w3.org/2000/svg" width="'.$size.'" height="'.$size.'" fill="none" stroke="'.$color.'" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15a7 7 0 1 0 0-14 7 7 0 0 0 0 14Z"></path><path d="M8.2 13.9 7 23l5-3 5 3-1.2-9.1"></path></svg>',
+        'search' => '<svg xmlns="http://www.w3.org/2000/svg" width="'.$size.'" height="'.$size.'" fill="none" stroke="'.$color.'" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><path d="M8 11h6"></path><path d="M11 8v6"></path></svg>',
+        'lock' => '<svg xmlns="http://www.w3.org/2000/svg" width="'.$size.'" height="'.$size.'" fill="none" stroke="'.$color.'" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>',
+        'map-pin' => '<svg xmlns="http://www.w3.org/2000/svg" width="'.$size.'" height="'.$size.'" fill="none" stroke="'.$color.'" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>',
+        'mail' => '<svg xmlns="http://www.w3.org/2000/svg" width="'.$size.'" height="'.$size.'" fill="none" stroke="'.$color.'" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>',
+        'phone' => '<svg xmlns="http://www.w3.org/2000/svg" width="'.$size.'" height="'.$size.'" fill="none" stroke="'.$color.'" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>',
+        'clock' => '<svg xmlns="http://www.w3.org/2000/svg" width="'.$size.'" height="'.$size.'" fill="none" stroke="'.$color.'" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>',
+        'sparkle' => '<svg xmlns="http://www.w3.org/2000/svg" width="'.$size.'" height="'.$size.'" fill="none" stroke="'.$color.'" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>',
+        'facebook' => '<svg xmlns="http://www.w3.org/2000/svg" width="'.$size.'" height="'.$size.'" fill="none" stroke="'.$color.'" stroke-width="2" viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>',
+        'instagram' => '<svg xmlns="http://www.w3.org/2000/svg" width="'.$size.'" height="'.$size.'" fill="none" stroke="'.$color.'" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>',
+        'youtube' => '<svg xmlns="http://www.w3.org/2000/svg" width="'.$size.'" height="'.$size.'" fill="none" stroke="'.$color.'" stroke-width="2" viewBox="0 0 24 24"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon></svg>',
+        'mail' => '<svg xmlns="http://www.w3.org/2000/svg" width="'.$size.'" height="'.$size.'" fill="none" stroke="'.$color.'" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>',
+    ];
+    return $icons[$name] ?? $icons['sparkle'];
+}
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -98,6 +139,7 @@ $__pageTitle = $title ?? ($brand . ' — Lembaga Penelitian & Pengabdian');
         @keyframes monogramPop { 0% { transform: scale(0.4); opacity: 0; } 60% { transform: scale(1.15); } 100% { transform: scale(1); opacity: 1; } }
         @keyframes typingCaret { 0%,100% { border-color: transparent; } 50% { border-color: #f2c063; } }
         @keyframes confettiFall { to { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
+        @keyframes socPop { 0% { transform: scale(0.4) rotate(-180deg); opacity: 0; } 60% { transform: scale(1.15) rotate(10deg); } 100% { transform: scale(1) rotate(0); opacity: 1; } }
 
         /* ============ SPLASH ============ */
         #splash { position: fixed; inset: 0; z-index: 99999; background: linear-gradient(135deg, #043b2c, #065f46 60%, #059669); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 18px; transition: opacity 0.8s cubic-bezier(0.4,0,0.2,1), visibility 0.8s, transform 0.8s ease; }
@@ -184,6 +226,8 @@ $__pageTitle = $title ?? ($brand . ' — Lembaga Penelitian & Pengabdian');
         .soc-3d { position: relative; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), box-shadow 0.35s; overflow: hidden; }
         .soc-3d::before { content: ''; position: absolute; top: 6px; left: 10px; width: 14px; height: 7px; border-radius: 50%; background: rgba(255,255,255,0.5); filter: blur(2px); }
         .soc-3d:hover { transform: translateY(-4px) rotate(-8deg) scale(1.08); }
+        .soc-3d.pop { animation: socPop 0.6s cubic-bezier(0.16,1,0.3,1) both; }
+        .soc-3d svg { width: 20px; height: 20px; }
         .soc-fb { background: radial-gradient(circle at 30% 30%, #4dabf7, #1877F2 60%, #0a4fa3); box-shadow: 0 6px 14px rgba(24,119,242,0.5), inset 0 -4px 8px rgba(0,0,0,0.3); color: white; }
         .soc-ig { background: radial-gradient(circle at 30% 30%, #fec260, #e1306c 50%, #833ab4); box-shadow: 0 6px 14px rgba(225,48,108,0.5), inset 0 -4px 8px rgba(0,0,0,0.3); color: white; }
         .soc-yt { background: radial-gradient(circle at 30% 30%, #ff6b6b, #ff0000 60%, #990000); box-shadow: 0 6px 14px rgba(255,0,0,0.45), inset 0 -4px 8px rgba(0,0,0,0.3); color: white; }
@@ -194,12 +238,16 @@ $__pageTitle = $title ?? ($brand . ' — Lembaga Penelitian & Pengabdian');
         .ft-link { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: rgba(255,255,255,0.85); padding: 6px 0; transition: all 0.25s; }
         .ft-link:hover { color: #f2c063; transform: translateX(4px); }
         .ft-link::before { content: '▸'; color: #d9a441; font-weight: 800; }
+        .ft-link svg { width: 16px; height: 16px; opacity: 0.7; transition: all 0.2s; }
+        .ft-link:hover svg { opacity: 1; stroke: #f2c063; }
         .ct-3d { display: flex; align-items: flex-start; gap: 12px; font-size: 13.5px; color: rgba(255,255,255,0.85); line-height: 1.6; }
         .ct-3d-ico { flex-shrink: 0; width: 32px; height: 32px; border-radius: 10px; background: linear-gradient(145deg, rgba(217,164,65,0.2), rgba(169,118,27,0.15)); border: 1px solid rgba(217,164,65,0.3); display: flex; align-items: center; justify-content: center; font-size: 15px; }
+        .ct-3d-ico svg { width: 16px; height: 16px; stroke: #f2c063; }
         .ft-smart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; }
         .ft-smart-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); text-decoration: none; color: rgba(255,255,255,0.9); transition: all 0.25s; font-size: 13px; }
         .ft-smart-item:hover { background: rgba(217,164,65,0.12); border-color: rgba(217,164,65,0.35); transform: translateX(4px); color: #f2c063; }
         .ft-smart-item .ft-smart-ico { font-size: 18px; flex-shrink: 0; }
+        .ft-smart-item .ft-smart-ico svg { width: 20px; height: 20px; }
         .ft-smart-item strong { display: block; font-size: 12px; color: inherit; }
         .ft-smart-item small { font-size: 10px; opacity: 0.65; }
 
@@ -259,93 +307,93 @@ $__pageTitle = $title ?? ($brand . ' — Lembaga Penelitian & Pengabdian');
             <ul class="menu">
                 <li>
                     <a href="<?= e(url('public/index.php?page=home')) ?>" class="<?= $__page === 'home' ? 'active' : '' ?>">
-                        <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></span>Beranda
+                        <span class="nav-ico"><?= renderLayoutIcon('home', 18, 'currentColor') ?></span>Beranda
                     </a>
                 </li>
 
                 <li class="has-dropdown">
-                    <a href="#" class="dropdown-toggle"><span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></span>Tentang</a>
+                    <a href="#" class="dropdown-toggle"><span class="nav-ico"><?= renderLayoutIcon('info', 18, 'currentColor') ?></span>Tentang</a>
                     <div class="dropdown-menu">
-                        <a href="<?= e(url('public/index.php?page=tentang')) ?>" class="dropdown-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg> Profil Lembaga</a>
-                        <a href="<?= e(url('public/index.php?page=tentang#visi')) ?>" class="dropdown-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg> Visi & Misi</a>
-                        <a href="<?= e(url('public/index.php?page=tentang#struktur')) ?>" class="dropdown-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg> Struktur Organisasi</a>
-                        <a href="<?= e(url('public/index.php?page=kontak')) ?>" class="dropdown-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg> Hubungi Kami</a>
+                        <a href="<?= e(url('public/index.php?page=tentang')) ?>" class="dropdown-link"><?= renderLayoutIcon('user', 16, 'currentColor') ?> Profil Lembaga</a>
+                        <a href="<?= e(url('public/index.php?page=tentang#visi')) ?>" class="dropdown-link"><?= renderLayoutIcon('eye', 16, 'currentColor') ?> Visi & Misi</a>
+                        <a href="<?= e(url('public/index.php?page=tentang#struktur')) ?>" class="dropdown-link"><?= renderLayoutIcon('grid', 16, 'currentColor') ?> Struktur Organisasi</a>
+                        <a href="<?= e(url('public/index.php?page=kontak')) ?>" class="dropdown-link"><?= renderLayoutIcon('message-circle', 16, 'currentColor') ?> Hubungi Kami</a>
                     </div>
                 </li>
 
                 <li>
                     <a href="<?= e(url('public/index.php?page=berita')) ?>" class="<?= $__page === 'berita' ? 'active' : '' ?>">
-                        <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"></path><path d="M18 14h-8"></path><path d="M15 18h-5"></path><path d="M10 6h8v4h-8V6Z"></path></svg></span>Berita
+                        <span class="nav-ico"><?= renderLayoutIcon('newspaper', 18, 'currentColor') ?></span>Berita
                     </a>
                 </li>
 
                 <li class="has-dropdown">
-                    <a href="#" class="dropdown-toggle <?= in_array($__page, ['galeri', 'video', 'podcast'], true) ? 'active' : '' ?>"><span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg></span>Galeri</a>
+                    <a href="#" class="dropdown-toggle <?= in_array($__page, ['galeri', 'video', 'podcast'], true) ? 'active' : '' ?>"><span class="nav-ico"><?= renderLayoutIcon('image', 18, 'currentColor') ?></span>Galeri</a>
                     <div class="dropdown-menu">
-                        <a href="<?= e(url('public/index.php?page=galeri')) ?>" class="dropdown-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg> Galeri Foto</a>
-                        <a href="<?= e(url('public/index.php?page=video')) ?>" class="dropdown-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg> Video Kegiatan</a>
-                        <a href="<?= e(url('public/index.php?page=podcast')) ?>" class="dropdown-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg> Podcast</a>
+                        <a href="<?= e(url('public/index.php?page=galeri')) ?>" class="dropdown-link"><?= renderLayoutIcon('image', 16, 'currentColor') ?> Galeri Foto</a>
+                        <a href="<?= e(url('public/index.php?page=video')) ?>" class="dropdown-link"><?= renderLayoutIcon('video', 16, 'currentColor') ?> Video Kegiatan</a>
+                        <a href="<?= e(url('public/index.php?page=podcast')) ?>" class="dropdown-link"><?= renderLayoutIcon('mic', 16, 'currentColor') ?> Podcast</a>
                     </div>
                 </li>
 
                 <li>
                     <a href="<?= e(url('public/index.php?page=dosen')) ?>" class="<?= $__page === 'dosen' ? 'active' : '' ?>">
-                        <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 4L2 9l10 5 10-5-10-5z"></path><path d="M6 11.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-4.5"></path><path d="M22 9v6"></path></svg></span>Dosen
+                        <span class="nav-ico"><?= renderLayoutIcon('graduation-cap', 18, 'currentColor') ?></span>Dosen
                     </a>
                 </li>
 
                 <li class="has-dropdown">
-                    <a href="#" class="dropdown-toggle"><span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg></span>Catur Dharma</a>
+                    <a href="#" class="dropdown-toggle"><span class="nav-ico"><?= renderLayoutIcon('award', 18, 'currentColor') ?></span>Catur Dharma</a>
                     <div class="dropdown-menu mega-dropdown">
                         <a href="<?= e(url('public/index.php?page=penelitian')) ?>" class="dropdown-item">
-                            <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 3h6v2H9V3zm-3 4h12v2H6V7zm2 4h8v10H8V11z"></path><path d="M10 15h4"></path></svg></span>
+                            <span class="nav-ico"><?= renderLayoutIcon('microscope', 18, 'currentColor') ?></span>
                             <div class="item-text"><strong>Penelitian</strong><span>Proposal & Laporan</span></div>
                         </a>
                         <a href="<?= e(url('public/index.php?page=pengabdian')) ?>" class="dropdown-item">
-                            <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span>
+                            <span class="nav-ico"><?= renderLayoutIcon('handshake', 18, 'currentColor') ?></span>
                             <div class="item-text"><strong>Pengabdian</strong><span>KKN & Desa Binaan</span></div>
                         </a>
                         <a href="<?= e(url('public/index.php?page=publikasi')) ?>" class="dropdown-item">
-                            <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg></span>
+                            <span class="nav-ico"><?= renderLayoutIcon('book', 18, 'currentColor') ?></span>
                             <div class="item-text"><strong>Publikasi</strong><span>Jurnal & Prosiding</span></div>
                         </a>
                         <a href="<?= e(url('public/index.php?page=aik')) ?>" class="dropdown-item">
-                            <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"></path><path d="M12 6v6l4 2"></path></svg></span>
+                            <span class="nav-ico"><?= renderLayoutIcon('mosque', 18, 'currentColor') ?></span>
                             <div class="item-text"><strong>AIK</strong><span>Al-Islam Kemuhammadiyahan</span></div>
                         </a>
                     </div>
                 </li>
 
                 <li class="has-dropdown">
-                    <a href="#" class="dropdown-toggle"><span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></span>Layanan</a>
+                    <a href="#" class="dropdown-toggle"><span class="nav-ico"><?= renderLayoutIcon('download', 18, 'currentColor') ?></span>Layanan</a>
                     <div class="dropdown-menu">
                         <a href="<?= e(url('public/index.php?page=agenda')) ?>" class="dropdown-link">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                            <?= renderLayoutIcon('calendar', 16, 'currentColor') ?>
                             Agenda Kegiatan
                             <?php if ($upcomingCount > 0): ?><span class="dropdown-item-badge"><?= $upcomingCount ?></span><?php endif; ?>
                         </a>
                         <a href="<?= e(url('public/index.php?page=survei')) ?>" class="dropdown-link">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+                            <?= renderLayoutIcon('check-square', 16, 'currentColor') ?>
                             Survei Kepuasan
                         </a>
                         <a href="<?= e(url('public/index.php?page=panduan')) ?>" class="dropdown-link">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                            <?= renderLayoutIcon('book-open', 16, 'currentColor') ?>
                             Panduan Layanan
                         </a>
                         <a href="<?= e(url('public/index.php?page=unduhan')) ?>" class="dropdown-link">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                            <?= renderLayoutIcon('file-text', 16, 'currentColor') ?>
                             Unduhan Dokumen
                         </a>
                         <a href="<?= e(url('public/index.php?page=hibah')) ?>" class="dropdown-link">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                            <?= renderLayoutIcon('dollar-sign', 16, 'currentColor') ?>
                             Hibah Aktif
                         </a>
                         <a href="<?= e(url('public/index.php?page=verifikasi-sertifikat')) ?>" class="dropdown-link">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 15a7 7 0 1 0 0-14 7 7 0 0 0 0 14Z"></path><path d="M8.2 13.9 7 23l5-3 5 3-1.2-9.1"></path></svg>
+                            <?= renderLayoutIcon('award-check', 16, 'currentColor') ?>
                             Verifikasi Sertifikat
                         </a>
                         <a href="<?= e(url('public/index.php?page=cek-plagiat')) ?>" class="dropdown-link">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><path d="M8 11h6"></path><path d="M11 8v6"></path></svg>
+                            <?= renderLayoutIcon('search', 16, 'currentColor') ?>
                             Cek Plagiarisme
                             <?php if ($publicPlagCount > 0): ?><span class="dropdown-item-badge"><?= $publicPlagCount ?></span><?php endif; ?>
                         </a>
@@ -354,7 +402,7 @@ $__pageTitle = $title ?? ($brand . ' — Lembaga Penelitian & Pengabdian');
 
                 <li>
                     <a href="<?= e(url('admin/index.php?page=login')) ?>">
-                        <span class="nav-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></span>Login
+                        <span class="nav-ico"><?= renderLayoutIcon('lock', 18, 'currentColor') ?></span>Login
                     </a>
                 </li>
             </ul>
@@ -390,60 +438,63 @@ $__pageTitle = $title ?? ($brand . ' — Lembaga Penelitian & Pengabdian');
                 </p>
                 <p style="font-size: 11px; font-weight: 800; letter-spacing: 0.18em; color: #f2c063; margin-bottom: 10px;">IKUTI KAMI</p>
                 <div style="display: flex; gap: 10px;" id="soc-row">
-                    <a href="#" class="soc-3d soc-fb" aria-label="Facebook">📘</a>
-                    <a href="#" class="soc-3d soc-ig" aria-label="Instagram">📸</a>
-                    <a href="#" class="soc-3d soc-yt" aria-label="YouTube">▶️</a>
-                    <a href="mailto:<?= e($fcEmail) ?>" class="soc-3d soc-em" aria-label="Email">✉️</a>
+                    <a href="#" class="soc-3d soc-fb" aria-label="Facebook"><?= renderLayoutIcon('facebook', 20, 'currentColor') ?></a>
+                    <a href="#" class="soc-3d soc-ig" aria-label="Instagram"><?= renderLayoutIcon('instagram', 20, 'currentColor') ?></a>
+                    <a href="#" class="soc-3d soc-yt" aria-label="YouTube"><?= renderLayoutIcon('youtube', 20, 'currentColor') ?></a>
+                    <a href="mailto:<?= e($fcEmail) ?>" class="soc-3d soc-em" aria-label="Email"><?= renderLayoutIcon('mail', 20, 'currentColor') ?></a>
                 </div>
             </div>
 
             <div>
                 <h4 class="ft-hd">NAVIGASI</h4>
                 <ul style="list-style: none; display: flex; flex-direction: column; gap: 2px; margin:0; padding:0;">
-                    <li><a class="ft-link" href="<?= e(url('public/index.php?page=home')) ?>">Beranda</a></li>
-                    <li><a class="ft-link" href="<?= e(url('public/index.php?page=tentang')) ?>">Tentang Kami</a></li>
-                    <li><a class="ft-link" href="<?= e(url('public/index.php?page=berita')) ?>">Berita</a></li>
-                    <li><a class="ft-link" href="<?= e(url('public/index.php?page=unduhan')) ?>">Dokumen</a></li>
-                    <li><a class="ft-link" href="<?= e(url('public/index.php?page=galeri')) ?>">Galeri</a></li>
-                    <li><a class="ft-link" href="<?= e(url('public/index.php?page=panduan')) ?>">Panduan Layanan</a></li>
+                    <li><a class="ft-link" href="<?= e(url('public/index.php?page=home')) ?>"><?= renderLayoutIcon('home', 16, 'currentColor') ?> Beranda</a></li>
+                    <li><a class="ft-link" href="<?= e(url('public/index.php?page=tentang')) ?>"><?= renderLayoutIcon('info', 16, 'currentColor') ?> Tentang Kami</a></li>
+                    <li><a class="ft-link" href="<?= e(url('public/index.php?page=berita')) ?>"><?= renderLayoutIcon('newspaper', 16, 'currentColor') ?> Berita</a></li>
+                    <li><a class="ft-link" href="<?= e(url('public/index.php?page=unduhan')) ?>"><?= renderLayoutIcon('file-text', 16, 'currentColor') ?> Dokumen</a></li>
+                    <li><a class="ft-link" href="<?= e(url('public/index.php?page=galeri')) ?>"><?= renderLayoutIcon('image', 16, 'currentColor') ?> Galeri</a></li>
+                    <li><a class="ft-link" href="<?= e(url('public/index.php?page=panduan')) ?>"><?= renderLayoutIcon('book-open', 16, 'currentColor') ?> Panduan Layanan</a></li>
                 </ul>
             </div>
 
             <div>
                 <h4 class="ft-hd">CATUR DHARMA</h4>
                 <ul style="list-style: none; display: flex; flex-direction: column; gap: 2px; margin:0; padding:0;">
-                    <li><a class="ft-link" href="<?= e(url('public/index.php?page=penelitian')) ?>">🔬 Penelitian</a></li>
-                    <li><a class="ft-link" href="<?= e(url('public/index.php?page=pengabdian')) ?>">🤝 Pengabdian</a></li>
-                    <li><a class="ft-link" href="<?= e(url('public/index.php?page=publikasi')) ?>">📚 Publikasi</a></li>
-                    <li><a class="ft-link" href="<?= e(url('public/index.php?page=haki')) ?>">🛡️ HAKI</a></li>
-                    <li><a class="ft-link" href="<?= e(url('public/index.php?page=aik')) ?>">🕌 AIK</a></li>
+                    <li><a class="ft-link" href="<?= e(url('public/index.php?page=penelitian')) ?>"><?= renderLayoutIcon('microscope', 16, 'currentColor') ?> Penelitian</a></li>
+                    <li><a class="ft-link" href="<?= e(url('public/index.php?page=pengabdian')) ?>"><?= renderLayoutIcon('handshake', 16, 'currentColor') ?> Pengabdian</a></li>
+                    <li><a class="ft-link" href="<?= e(url('public/index.php?page=publikasi')) ?>"><?= renderLayoutIcon('book', 16, 'currentColor') ?> Publikasi</a></li>
+                    <li><a class="ft-link" href="<?= e(url('public/index.php?page=haki')) ?>"><?= renderLayoutIcon('award-check', 16, 'currentColor') ?> HAKI</a></li>
+                    <li><a class="ft-link" href="<?= e(url('public/index.php?page=aik')) ?>"><?= renderLayoutIcon('mosque', 16, 'currentColor') ?> AIK</a></li>
                 </ul>
             </div>
 
             <div>
                 <h4 class="ft-hd">LAYANAN CERDAS ✦</h4>
                 <div class="ft-smart-grid">
-                    <a href="<?= e(url('public/index.php?page=agenda')) ?>" class="ft-smart-item"><span class="ft-smart-ico">📅</span><div><strong>Agenda</strong><small><?= $upcomingCount ?> kegiatan</small></div></a>
-                    <a href="<?= e(url('public/index.php?page=verifikasi-sertifikat')) ?>" class="ft-smart-item"><span class="ft-smart-ico">🎓</span><div><strong>Sertifikat</strong><small>Verifikasi online</small></div></a>
-                    <a href="<?= e(url('public/index.php?page=cek-plagiat')) ?>" class="ft-smart-item"><span class="ft-smart-ico">🔍</span><div><strong>Cek Plagiat</strong><small><?= $publicPlagCount ?> laporan</small></div></a>
-                    <a href="<?= e(url('public/index.php?page=hibah')) ?>" class="ft-smart-item"><span class="ft-smart-ico">💰</span><div><strong>Hibah</strong><small>Pendanaan riset</small></div></a>
+                    <a href="<?= e(url('public/index.php?page=agenda')) ?>" class="ft-smart-item"><span class="ft-smart-ico"><?= renderLayoutIcon('calendar', 20, 'currentColor') ?></span><div><strong>Agenda</strong><small><?= $upcomingCount ?> kegiatan</small></div></a>
+                    <a href="<?= e(url('public/index.php?page=verifikasi-sertifikat')) ?>" class="ft-smart-item"><span class="ft-smart-ico"><?= renderLayoutIcon('award-check', 20, 'currentColor') ?></span><div><strong>Sertifikat</strong><small>Verifikasi online</small></div></a>
+                    <a href="<?= e(url('public/index.php?page=cek-plagiat')) ?>" class="ft-smart-item"><span class="ft-smart-ico"><?= renderLayoutIcon('search', 20, 'currentColor') ?></span><div><strong>Cek Plagiat</strong><small><?= $publicPlagCount ?> laporan</small></div></a>
+                    <a href="<?= e(url('public/index.php?page=hibah')) ?>" class="ft-smart-item"><span class="ft-smart-ico"><?= renderLayoutIcon('dollar-sign', 20, 'currentColor') ?></span><div><strong>Hibah</strong><small>Pendanaan riset</small></div></a>
                 </div>
             </div>
 
             <div>
                 <h4 class="ft-hd">HUBUNGI KAMI</h4>
                 <div style="display: flex; flex-direction: column; gap: 12px;">
-                    <div class="ct-3d"><span class="ct-3d-ico">📍</span><span><?= e($fcAddress) ?></span></div>
-                    <div class="ct-3d"><span class="ct-3d-ico">✉️</span><span><?= e($fcEmail) ?></span></div>
-                    <div class="ct-3d"><span class="ct-3d-ico">📞</span><span><?= e($fcPhone) ?></span></div>
-                    <div class="ct-3d"><span class="ct-3d-ico">🕒</span><span><?= e($fcHours) ?></span></div>
+                    <div class="ct-3d"><span class="ct-3d-ico"><?= renderLayoutIcon('map-pin', 16, 'currentColor') ?></span><span><?= e($fcAddress) ?></span></div>
+                    <div class="ct-3d"><span class="ct-3d-ico"><?= renderLayoutIcon('mail', 16, 'currentColor') ?></span><span><?= e($fcEmail) ?></span></div>
+                    <div class="ct-3d"><span class="ct-3d-ico"><?= renderLayoutIcon('phone', 16, 'currentColor') ?></span><span><?= e($fcPhone) ?></span></div>
+                    <div class="ct-3d"><span class="ct-3d-ico"><?= renderLayoutIcon('clock', 16, 'currentColor') ?></span><span><?= e($fcHours) ?></span></div>
                 </div>
             </div>
         </div>
 
         <div style="margin:34px 0 0; padding:26px 28px; border-radius:20px; background:linear-gradient(135deg,rgba(217,164,65,.16),rgba(217,164,65,.05)); border:1px solid rgba(217,164,65,.35); display:flex; gap:18px; align-items:center; flex-wrap:wrap;">
             <div style="flex:1; min-width:220px;">
-                <div style="font-family:var(--font-display); font-weight:900; font-size:17px; color:#fff; margin-bottom:4px;">📬 Langganan Info LP3M</div>
+                <div style="font-family:var(--font-display); font-weight:900; font-size:17px; color:#fff; margin-bottom:4px; display: flex; align-items: center; gap: 8px;">
+                    <?= renderLayoutIcon('mail', 20, '#f2c063') ?>
+                    <span>Langganan Info LP3M</span>
+                </div>
                 <div style="font-size:12.5px; color:rgba(255,255,255,.75);">Pengumuman hibah, kegiatan, dan publikasi terbaru langsung ke email Anda.</div>
             </div>
             <form method="post" action="<?= e(url('public/index.php?page=subscribe')) ?>" style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -455,7 +506,10 @@ $__pageTitle = $title ?? ($brand . ' — Lembaga Penelitian & Pengabdian');
 
         <div style="border-top: 1px solid rgba(255,255,255,0.1); padding: 22px 0; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
             <p style="font-size: 13px; color: rgba(255,255,255,0.6); margin:0;"><?= $footerLine ?></p>
-            <p style="font-size: 12px; color: rgba(255,255,255,0.5); margin:0;">⚡ <span style="color: #f2c063; font-weight: 700;">Fastabiqul Khairat</span></p>
+            <p style="font-size: 12px; color: rgba(255,255,255,0.5); margin:0; display: flex; align-items: center; gap: 6px;">
+                <?= renderLayoutIcon('sparkle', 14, '#f2c063') ?>
+                <span style="color: #f2c063; font-weight: 700;">Fastabiqul Khairat</span>
+            </p>
         </div>
     </div>
 </footer>

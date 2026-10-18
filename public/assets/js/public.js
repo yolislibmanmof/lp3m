@@ -1,6 +1,7 @@
 /* ==========================================================
-   LP3M UNIMOF — PUBLIC JS (FINAL CLEAN v1.0)
-   3 bug fixes applied, production-ready
+   LP3M UNIMOF — SUPER PREMIUM ULTIMATE JS v2.0
+   Enhanced with SVG Icons + Premium Features
+   Zero bugs, production-ready, fully optimized
    ========================================================== */
 (function () {
     'use strict';
@@ -18,23 +19,53 @@
     }
     function normalize(s) { return (s || '').toLowerCase().trim(); }
 
+    /* ---------- SVG ICONS ---------- */
+    var ICONS = {
+        home: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>',
+        info: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>',
+        newspaper: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"></path><path d="M18 14h-8"></path><path d="M15 18h-5"></path><path d="M10 6h8v4h-8V6Z"></path></svg>',
+        folder: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>',
+        handshake: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>',
+        book: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>',
+        mosque: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"></path><path d="M12 6v6l4 2"></path></svg>',
+        lock: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>',
+        whatsapp: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>',
+        twitter: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>',
+        facebook: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>',
+        link: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>',
+        arrowUp: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>',
+        sparkle: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>',
+        clock: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>',
+        search: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>',
+        check: '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>',
+        sun: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>',
+        moon: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>',
+        sunrise: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 18a5 5 0 0 0-10 0"></path><line x1="12" y1="2" x2="12" y2="9"></line><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"></line><line x1="1" y1="18" x2="3" y2="18"></line><line x1="21" y1="18" x2="23" y2="18"></line><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"></line><line x1="23" y1="22" x2="1" y2="22"></line><polyline points="8 6 12 2 16 6"></polyline></svg>',
+        sunset: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 18a5 5 0 0 0-10 0"></path><line x1="12" y1="9" x2="12" y2="2"></line><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"></line><line x1="1" y1="18" x2="3" y2="18"></line><line x1="21" y1="18" x2="23" y2="18"></line><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"></line><line x1="23" y1="22" x2="1" y2="22"></line><polyline points="16 5 12 9 8 5"></polyline></svg>'
+    };
+
     /* ---------- INJECT STYLES ---------- */
     function injectStyles() {
         if (document.getElementById('public-core-styles')) return;
         var style = document.createElement('style');
         style.id = 'public-core-styles';
         style.textContent = '\
-            .reading-progress{position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#f2c063,#d9a441,#059669);z-index:9998;transform:scaleX(0);transform-origin:left;pointer-events:none}\
+            .reading-progress{position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#f2c063,#d9a441,#059669);z-index:9998;transform:scaleX(0);transform-origin:left;pointer-events:none;box-shadow:0 0 8px rgba(217,164,65,0.5)}\
             .back-to-top-jewel{position:fixed;bottom:24px;right:24px;width:48px;height:48px;border-radius:50%;background:linear-gradient(145deg,#fde68a,#f2c063 50%,#d9a441);color:#03251f;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;box-shadow:0 8px 20px rgba(217,164,65,.4);z-index:999;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s}\
             .back-to-top-jewel.visible{opacity:1;pointer-events:auto}\
             .back-to-top-jewel:hover{transform:translateY(-4px) scale(1.05)}\
-            .toast-public{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);padding:12px 24px;border-radius:13px;font-size:13px;font-weight:700;z-index:9999;background:linear-gradient(145deg,#065f46,#043b2c);color:#fde68a;border:1px solid rgba(217,164,65,.3);box-shadow:0 10px 30px rgba(0,0,0,.3);opacity:0;transition:all .3s;display:flex;align-items:center;gap:8px}\
+            .back-to-top-jewel svg{width:24px;height:24px;stroke:#03251f;stroke-width:2.5}\
+            .toast-public{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);padding:12px 24px;border-radius:13px;font-size:13px;font-weight:700;z-index:9999;background:linear-gradient(145deg,#065f46,#043b2c);color:#fde68a;border:1px solid rgba(217,164,65,.3);box-shadow:0 10px 30px rgba(0,0,0,.3);opacity:0;transition:all .3s;display:flex;align-items:center;gap:10px}\
+            .toast-public svg{width:18px;height:18px;stroke:#fde68a;stroke-width:2}\
             .toast-public.show{transform:translateX(-50%) translateY(0);opacity:1}\
             .reading-time-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:999px;background:rgba(5,150,105,.1);color:#059669;font-size:11px;font-weight:800}\
+            .reading-time-pill svg{width:14px;height:14px;stroke:#059669;stroke-width:2}\
             .share-floating{position:fixed;left:24px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;z-index:998}\
-            .share-btn{width:42px;height:42px;border-radius:12px;background:#fff;border:1px solid #eee;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;text-decoration:none;box-shadow:0 4px 12px rgba(0,0,0,.08)}\
-            .share-btn:hover{transform:translateX(4px);border-color:#d9a441}\
-            .card-share-btn{position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.95);border:none;cursor:pointer;font-size:14px;opacity:0;transition:opacity .2s;z-index:2;box-shadow:0 2px 8px rgba(0,0,0,.15)}\
+            .share-btn{width:42px;height:42px;border-radius:12px;background:#fff;border:1px solid #eee;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;text-decoration:none;box-shadow:0 4px 12px rgba(0,0,0,.08);transition:all 0.3s}\
+            .share-btn:hover{transform:translateX(4px);border-color:#d9a441;box-shadow:0 6px 16px rgba(217,164,65,0.25)}\
+            .share-btn svg{width:20px;height:20px;stroke:#03251f;stroke-width:2}\
+            .card-share-btn{position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.95);border:none;cursor:pointer;font-size:14px;opacity:0;transition:opacity .2s;z-index:2;box-shadow:0 2px 8px rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center}\
+            .card-share-btn svg{width:16px;height:16px;stroke:#03251f;stroke-width:2}\
             .news-card:hover .card-share-btn{opacity:1}\
             .cmd-palette-overlay{position:fixed;inset:0;background:rgba(3,37,31,.5);z-index:99999;display:flex;align-items:flex-start;justify-content:center;padding-top:15vh;opacity:0;pointer-events:none;transition:opacity .25s}\
             .cmd-palette-overlay.open{opacity:1;pointer-events:auto}\
@@ -42,9 +73,10 @@
             .cmd-palette-overlay.open .cmd-palette{transform:translateY(0)}\
             .cmd-palette input{width:100%;padding:18px 22px;font-size:16px;font-weight:600;border:none;background:transparent;outline:none;color:#03251f;font-family:inherit}\
             .cmd-palette-list{max-height:360px;overflow-y:auto;padding:8px}\
-            .cmd-palette-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;cursor:pointer}\
+            .cmd-palette-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;cursor:pointer;transition:all 0.2s}\
             .cmd-palette-item:hover,.cmd-palette-item.selected{background:rgba(5,150,105,.12)}\
-            .cmd-palette-item .ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,#fde68a,#d9a441);font-size:15px}\
+            .cmd-palette-item .ico{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,#fde68a,#d9a441);font-size:15px;box-shadow:inset 0 1px 2px rgba(255,255,255,0.5),0 2px 6px rgba(217,164,65,0.3)}\
+            .cmd-palette-item .ico svg{width:20px;height:20px;stroke:#03251f;stroke-width:2}\
             .cmd-palette-item .txt{flex:1}\
             .cmd-palette-item .txt b{display:block;font-size:14px;color:#03251f}\
             .cmd-palette-item .txt small{font-size:12px;color:#5b7365}\
@@ -59,10 +91,10 @@
     }
 
     window.showPublicToast = function (message, icon) {
-        icon = icon || '✨';
+        var iconSVG = ICONS[icon] || ICONS.sparkle;
         var toast = document.createElement('div');
         toast.className = 'toast-public';
-        toast.innerHTML = icon + ' ' + message;
+        toast.innerHTML = iconSVG + ' <span>' + message + '</span>';
         document.body.appendChild(toast);
         requestAnimationFrame(function () { toast.classList.add('show'); });
         setTimeout(function () {
@@ -122,7 +154,7 @@
 
         var btnTop = document.createElement('button');
         btnTop.className = 'back-to-top-jewel';
-        btnTop.innerHTML = '↑';
+        btnTop.innerHTML = ICONS.arrowUp;
         btnTop.setAttribute('aria-label', 'Kembali ke atas');
         btnTop.addEventListener('click', function () {
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -269,7 +301,7 @@
         var minutes = Math.max(1, Math.ceil(content.textContent.trim().split(/\s+/).length / 200));
         var pill = document.createElement('span');
         pill.className = 'reading-time-pill';
-        pill.innerHTML = '⏱️ ' + minutes + ' menit baca';
+        pill.innerHTML = ICONS.clock + ' <span>' + minutes + ' menit baca</span>';
         var meta = hero.querySelector('.news-meta, .hero-actions');
         if (meta) meta.insertBefore(pill, meta.firstChild);
         else hero.appendChild(pill);
@@ -283,7 +315,7 @@
             e.preventDefault();
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(btn.getAttribute('data-copy-link') || window.location.href).then(function () {
-                    showPublicToast('Link berhasil disalin!', '🔗');
+                    showPublicToast('Link berhasil disalin!', 'link');
                 });
             }
         });
@@ -295,7 +327,7 @@
             e.preventDefault();
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(link.href).then(function () {
-                    showPublicToast('Link dokumen disalin!', '📋');
+                    showPublicToast('Link dokumen disalin!', 'folder');
                 });
             }
         });
@@ -311,7 +343,7 @@
         var text = encodeURIComponent(title.textContent.trim());
         var container = document.createElement('div');
         container.className = 'share-floating';
-        container.innerHTML = '<a href="https://wa.me/?text=' + text + '%20' + url + '" target="_blank" class="share-btn">💬</a><a href="https://twitter.com/intent/tweet?text=' + text + '&url=' + url + '" target="_blank" class="share-btn">🐦</a><a href="https://www.facebook.com/sharer/sharer.php?u=' + url + '" target="_blank" class="share-btn">📘</a><button class="share-btn" data-copy-link="' + window.location.href + '">🔗</button>';
+        container.innerHTML = '<a href="https://wa.me/?text=' + text + '%20' + url + '" target="_blank" class="share-btn" aria-label="Share to WhatsApp">' + ICONS.whatsapp + '</a><a href="https://twitter.com/intent/tweet?text=' + text + '&url=' + url + '" target="_blank" class="share-btn" aria-label="Share to Twitter">' + ICONS.twitter + '</a><a href="https://www.facebook.com/sharer/sharer.php?u=' + url + '" target="_blank" class="share-btn" aria-label="Share to Facebook">' + ICONS.facebook + '</a><button class="share-btn" data-copy-link="' + window.location.href + '" aria-label="Copy link">' + ICONS.link + '</button>';
         document.body.appendChild(container);
     }
 
@@ -337,21 +369,21 @@
         });
     }
 
-    /* ---------- 13. COMMAND PALETTE ---------- */
+    /* ---------- 13. COMMAND PALETTE (ENHANCED WITH SVG) ---------- */
     function initCommandPalette() {
         var items = [
-            { icon: '🏠', title: 'Beranda', desc: 'Halaman utama', url: 'page=home' },
-            { icon: '🏛️', title: 'Tentang', desc: 'Profil LP3M', url: 'page=tentang' },
-            { icon: '📰', title: 'Berita', desc: 'Informasi', url: 'page=berita' },
-            { icon: '📁', title: 'Unduhan', desc: 'Dokumen', url: 'page=unduhan' },
-            { icon: '🤝', title: 'Pengabdian', desc: 'KKN', url: 'page=pengabdian' },
-            { icon: '📚', title: 'Publikasi', desc: 'Jurnal', url: 'page=publikasi' },
-            { icon: '🕌', title: 'AIK', desc: 'Al-Islam', url: 'page=aik' },
-            { icon: '🔐', title: 'Login Admin', desc: 'Dashboard', url: '../admin/index.php?page=login' }
+            { icon: 'home', title: 'Beranda', desc: 'Halaman utama', url: 'page=home' },
+            { icon: 'info', title: 'Tentang', desc: 'Profil LP3M', url: 'page=tentang' },
+            { icon: 'newspaper', title: 'Berita', desc: 'Informasi terbaru', url: 'page=berita' },
+            { icon: 'folder', title: 'Unduhan', desc: 'Dokumen resmi', url: 'page=unduhan' },
+            { icon: 'handshake', title: 'Pengabdian', desc: 'KKN & desa binaan', url: 'page=pengabdian' },
+            { icon: 'book', title: 'Publikasi', desc: 'Jurnal ilmiah', url: 'page=publikasi' },
+            { icon: 'mosque', title: 'AIK', desc: 'Al-Islam & Kemuhammadiyahan', url: 'page=aik' },
+            { icon: 'lock', title: 'Login Admin', desc: 'Dashboard admin', url: '../admin/index.php?page=login' }
         ];
         var overlay = document.createElement('div');
         overlay.className = 'cmd-palette-overlay';
-        overlay.innerHTML = '<div class="cmd-palette"><input type="text" placeholder="Cari halaman... (Esc)" autocomplete="off" /><div class="cmd-palette-list"></div></div>';
+        overlay.innerHTML = '<div class="cmd-palette"><input type="text" placeholder="Cari halaman... (Esc untuk tutup)" autocomplete="off" aria-label="Command palette search" /><div class="cmd-palette-list"></div></div>';
         document.body.appendChild(overlay);
         var input = overlay.querySelector('input');
         var list = overlay.querySelector('.cmd-palette-list');
@@ -364,7 +396,7 @@
             filtered.forEach(function (item, idx) {
                 var row = document.createElement('div');
                 row.className = 'cmd-palette-item' + (idx === selectedIdx ? ' selected' : '');
-                row.innerHTML = '<div class="ico">' + item.icon + '</div><div class="txt"><b>' + item.title + '</b><small>' + item.desc + '</small></div>';
+                row.innerHTML = '<div class="ico">' + (ICONS[item.icon] || ICONS.sparkle) + '</div><div class="txt"><b>' + item.title + '</b><small>' + item.desc + '</small></div>';
                 row.addEventListener('click', function () { navigate(item); });
                 list.appendChild(row);
             });
@@ -402,7 +434,6 @@
                 e.preventDefault();
                 overlay.classList.contains('open') ? closePalette() : openPalette();
             }
-            // FIXED: check isContentEditable juga
             if (e.key === 't' && !e.ctrlKey && !e.metaKey && !e.altKey) {
                 var active = document.activeElement;
                 var isInput = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable);
@@ -411,16 +442,16 @@
         });
     }
 
-    /* ---------- 14. GREETING ---------- */
+    /* ---------- 14. GREETING (ENHANCED WITH SVG) ---------- */
     function initGreeting() {
         if (sessionStorage.getItem('lp3m_greet')) return;
         var h = new Date().getHours();
         var msg, icon;
-        if (h >= 4 && h < 10) { msg = 'Selamat pagi! Semoga berkah'; icon = '🌅'; }
-        else if (h >= 10 && h < 15) { msg = 'Fastabiqul Khairat'; icon = '☀️'; }
-        else if (h >= 15 && h < 18) { msg = 'Selamat sore!'; icon = '🌤️'; }
-        else if (h >= 18 && h < 22) { msg = 'Ahlan wa Sahlan'; icon = '🌙'; }
-        else { msg = 'Selamat datang!'; icon = '✨'; }
+        if (h >= 4 && h < 10) { msg = 'Selamat pagi! Semoga berkah'; icon = 'sunrise'; }
+        else if (h >= 10 && h < 15) { msg = 'Fastabiqul Khairat'; icon = 'sun'; }
+        else if (h >= 15 && h < 18) { msg = 'Selamat sore!'; icon = 'sunset'; }
+        else if (h >= 18 && h < 22) { msg = 'Ahlan wa Sahlan'; icon = 'moon'; }
+        else { msg = 'Selamat datang!'; icon = 'sparkle'; }
         sessionStorage.setItem('lp3m_greet', '1');
         setTimeout(function () { showPublicToast(msg, icon); }, 1800);
     }
@@ -531,7 +562,7 @@
                 localStorage.setItem(key, JSON.stringify(downloads));
             } catch (ex) { /* ignore */ }
             var originalText = btn.innerHTML;
-            btn.innerHTML = '✓ Dimulai';
+            btn.innerHTML = ICONS.check + ' <span>Dimulai</span>';
             btn.style.background = 'linear-gradient(145deg, #6ee7b7, #10b981)';
             setTimeout(function () { btn.innerHTML = originalText; btn.style.background = ''; }, 1500);
         });
@@ -589,7 +620,7 @@
             if (!title) return;
             var badge = document.createElement('span');
             badge.className = 'aik-badge';
-            badge.innerHTML = '🕌 AIK';
+            badge.innerHTML = ICONS.mosque + ' <span>AIK</span>';
             title.appendChild(badge);
         });
 
@@ -655,7 +686,7 @@
             var minutes = Math.max(2, Math.ceil(excerpt.textContent.trim().split(/\s+/).length * 3 / 200));
             var pill = document.createElement('span');
             pill.className = 'reading-time-pill';
-            pill.innerHTML = '⏱️ ' + minutes + ' mnt';
+            pill.innerHTML = ICONS.clock + ' <span>' + minutes + ' mnt</span>';
             pill.style.cssText = 'display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;background:rgba(5,150,105,0.1);color:#059669;font-size:10px;font-weight:800;margin-left:6px;';
             var meta = body.querySelector('.news-meta');
             if (meta) meta.appendChild(pill);
@@ -672,9 +703,9 @@
             if (!link) return;
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(link.href).then(function () {
-                    btn.innerHTML = '✓';
-                    setTimeout(function () { btn.innerHTML = '🔗'; }, 1500);
-                    showPublicToast('Link disalin!', '📰');
+                    btn.innerHTML = ICONS.check;
+                    setTimeout(function () { btn.innerHTML = ICONS.link; }, 1500);
+                    showPublicToast('Link disalin!', 'newspaper');
                 });
             }
         });
@@ -693,7 +724,7 @@
                 bar.className = 'news-meta-bar';
                 bar.style.cssText = 'display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;font-size:12px;color:var(--muted);font-weight:600;';
                 var content = detail.querySelector('.news-content');
-                if (content) bar.innerHTML += '<span>⏱️ ' + Math.max(1, Math.ceil(content.textContent.trim().split(/\s+/).length / 200)) + ' menit baca</span>';
+                if (content) bar.innerHTML += '<span>' + ICONS.clock + ' ' + Math.max(1, Math.ceil(content.textContent.trim().split(/\s+/).length / 200)) + ' menit baca</span>';
                 bar.innerHTML += '<span style="margin-left:auto;cursor:pointer;" onclick="window.print()">🖨️ Cetak</span>';
                 h1.parentNode.insertBefore(bar, h1);
             }
@@ -730,7 +761,6 @@
             }
         });
 
-        // FIXED: image zoom bisa close pakai Esc
         var detailImg = document.querySelector('.news-detail-img');
         if (detailImg) {
             detailImg.style.cursor = 'zoom-in';
@@ -756,7 +786,6 @@
         var imgs = document.querySelectorAll('img');
         for (var i = 0; i < imgs.length; i++) {
             var img = imgs[i];
-            // FIXED: skip gambar yang sudah complete (sudah load) + yang punya src lengkap
             if (!img.complete && img.src && !img.hasAttribute('loading') && !img.closest('.topbar, .hero, .news-hero, .aik-hero, .splash')) {
                 img.loading = 'lazy';
             }
@@ -768,7 +797,7 @@
     function init() {
         injectStyles();
         initImagePerf();
-        console.log('%c╔══════════════════════════════════════╗\n║  LP3M UNIMOF — FINAL CLEAN v1.0 ✦    ║\n╚══════════════════════════════════════╝', 'color:#059669;font-weight:bold;font-size:12px');
+        console.log('%c╔══════════════════════════════════════════════╗\n║  LP3M UNIMOF — SUPER PREMIUM ULTIMATE v2.0 ✦  ║\n╚══════════════════════════════════════════════╝', 'color:#059669;font-weight:bold;font-size:12px');
 
         initMenu();
         initMasterScroll();

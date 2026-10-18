@@ -62,6 +62,50 @@ if ($page === 'login') {
 Auth::guard();
 
 // ══════════════════════════════════════════════════════════════
+// 🛡️ RBAC GUARD — pembatasan hak akses berdasarkan role
+// ══════════════════════════════════════════════════════════════
+$__role = Auth::user()['role'] ?? '';
+
+// Halaman yang boleh dibuka SEMUA role yang login
+$__openForAll = ['dashboard', 'profil-saya'];
+
+// Modul KHUSUS Super Admin (prefix mengunci semua sub-route)
+$__superOnly = ['users', 'backup', 'audit', 'broadcast', 'pengaturan', 'chatbot-config'];
+
+// Akses spesifik tambahan untuk role non-staf (sesuaikan kebutuhan)
+$__extraForRole = [
+    'dosen'    => [], // nanti bisa ditambah: ['penelitian', 'publikasi', 'haki']
+    'reviewer' => [], // nanti bisa ditambah: ['reviewers']
+    'pimpinan' => ['laporan'], // pimpinan bisa akses laporan
+    'mahasiswa'=> [],
+];
+
+$__denied = false;
+
+// Aturan A: role non-staf hanya boleh openForAll + extraForRole
+if (in_array($__role, ['dosen', 'reviewer', 'pimpinan', 'mahasiswa'], true)
+    && !in_array($page, $__openForAll, true)) {
+    $__ok = false;
+    foreach ($__extraForRole[$__role] ?? [] as $__p) {
+        if ($page === $__p || str_starts_with($page, $__p . '-')) { $__ok = true; break; }
+    }
+    if (!$__ok) $__denied = true;
+}
+
+// Aturan B: modul super-only dikunci untuk selain super_admin (termasuk admin_lp3m)
+if (!$__denied && $__role !== 'super_admin') {
+    foreach ($__superOnly as $__p) {
+        if ($page === $__p || str_starts_with($page, $__p . '-')) { $__denied = true; break; }
+    }
+}
+
+if ($__denied) {
+    http_response_code(403);
+    $_SESSION['flash'] = ['type' => 'error', 'message' => '🚫 Akses ditolak — role Anda tidak memiliki izin untuk modul ini.'];
+    redirect(url('admin/index.php?page=dashboard'));
+}
+
+// ══════════════════════════════════════════════════════════════
 // ROUTING
 // ══════════════════════════════════════════════════════════════
 switch ($page) {
