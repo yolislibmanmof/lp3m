@@ -26,26 +26,51 @@ class AdminPlagiarism
 
     public static function store(): void
     {
-        if (!Csrf::verify($_POST['_csrf'] ?? null)) { self::flash('error', 'Token tidak valid.'); redirect(url('admin/index.php?page=plagiarism-tambah')); }
+        if (!Csrf::verify($_POST['_csrf'] ?? null)) { 
+            self::flash('error', 'Token tidak valid.'); 
+            redirect(url('admin/index.php?page=plagiarism-tambah')); 
+        }
+        
         $title = trim($_POST['title'] ?? '');
         $submitter = trim($_POST['submitter_name'] ?? '');
-        $text = trim($_POST['text'] ?? '');
-        if ($title === '' || $submitter === '') { self::flash('error', 'Judul dan nama penulis wajib diisi.'); redirect(url('admin/index.php?page=plagiarism-tambah')); }
+        $docType = $_POST['document_type'] ?? 'lainnya';
+        
+        if ($title === '' || $submitter === '') { 
+            self::flash('error', 'Judul dan nama penulis wajib diisi.'); 
+            redirect(url('admin/index.php?page=plagiarism-tambah')); 
+        }
+        
+        // 🛡️ VALIDASI: Pastikan tipe dokumen ada di daftar yang diizinkan
+        if (!array_key_exists($docType, PlagiarismCheck::DOC_TYPES)) {
+            self::flash('error', 'Jenis dokumen tidak valid.');
+            redirect(url('admin/index.php?page=plagiarism-tambah'));
+        }
 
-        $filePath = null; $fileSize = 0;
-        $extractMethod = null; $extractPages = 0; $extractChars = 0;
+        $text = trim($_POST['text'] ?? '');
+        $filePath = null; 
+        $fileSize = 0;
+        $extractMethod = null; 
+        $extractPages = 0; 
+        $extractChars = 0;
         
         if (!empty($_FILES['document']['name'])) {
-            $f = $_FILES['document'];
-            $ext = strtolower(pathinfo($f['name'], PATHINFO_EXTENSION));
-            if (!in_array($ext, ['txt', 'md', 'pdf', 'docx'], true) || $f['size'] > 10 * 1024 * 1024) {
-                self::flash('error', 'File harus TXT/MD/PDF/DOCX maks 10MB.'); redirect(url('admin/index.php?page=plagiarism-tambah'));
+            // 🛡️ SECURITY PATCH: Gunakan Upload::file() yang sudah divalidasi MIME & bahayanya
+            $upload = \Upload::file(
+                $_FILES['document'], 
+                'plagiarism', 
+                10 * 1024 * 1024, // Maks 10MB
+                ['txt', 'md', 'pdf', 'docx', 'doc']
+            );
+            
+            if (!$upload['ok']) {
+                self::flash('error', $upload['error'] ?? 'Gagal mengunggah file.');
+                redirect(url('admin/index.php?page=plagiarism-tambah'));
             }
-            $dir = BASE_PATH . '/public/uploads/plagiarism/';
-            if (!is_dir($dir)) @mkdir($dir, 0755, true);
-            $filePath = 'uploads/plagiarism/' . date('Ymd_His') . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
-            move_uploaded_file($f['tmp_name'], BASE_PATH . '/public/' . $filePath);
-            $fileSize = (int) $f['size'];
+            
+            // Sesuaikan path agar kompatibel dengan logika extractFromFile yang sudah ada
+            $filePath = 'uploads/' . $upload['path'];
+            $fileSize = $upload['size'] ?? 0;
+            $ext = strtolower(pathinfo($_FILES['document']['name'], PATHINFO_EXTENSION));
             
             // ⚡ AUTO-EXTRACT untuk semua format
             if (in_array($ext, ['txt', 'md'], true)) {
@@ -60,21 +85,28 @@ class AdminPlagiarism
                 $extractPages = $result['pages'];
                 $extractChars = $result['chars'];
                 
-                if (strlen($result['text']) > 50) {
+                if (!empty($result['text']) && strlen($result['text']) > 50) {
                     $text = $result['text'];
                 }
             }
         }
 
-        if ($text === '' && $filePath === null) { self::flash('error', 'Isi dokumen atau file wajib diisi.'); redirect(url('admin/index.php?page=plagiarism-tambah')); }
+        if ($text === '' && $filePath === null) { 
+            self::flash('error', 'Isi dokumen atau file wajib diisi.'); 
+            redirect(url('admin/index.php?page=plagiarism-tambah')); 
+        }
 
         $code = PlagiarismCheck::nextCode();
         $id = PlagiarismCheck::create([
-            'code' => $code, 'title' => $title, 'submitter_name' => $submitter,
+            'code' => $code, 
+            'title' => $title, 
+            'submitter_name' => $submitter,
             'submitter_email' => trim($_POST['submitter_email'] ?? ''),
             'submitter_identity' => trim($_POST['submitter_identity'] ?? ''),
-            'document_type' => $_POST['document_type'] ?? 'lainnya',
-            'file_path' => $filePath, 'file_size' => $fileSize, 'word_count' => 0,
+            'document_type' => $docType,
+            'file_path' => $filePath, 
+            'file_size' => $fileSize, 
+            'word_count' => 0,
             'status' => $text !== '' ? 'processing' : 'queued',
             'source_text' => $text !== '' ? mb_substr($text, 0, 200000) : null,
             'extract_method' => $extractMethod,
@@ -132,10 +164,21 @@ class AdminPlagiarism
 
     public static function destroy(): void
     {
-        if (!Csrf::verify($_POST['_csrf'] ?? null)) { redirect(url('admin/index.php?page=plagiarism')); }
+        if (!Csrf::verify($_POST['_csrf'] ?? null)) { 
+            redirect(url('admin/index.php?page=plagiarism')); 
+        }
+        
         $id = (int) ($_POST['id'] ?? 0);
         $item = PlagiarismCheck::find($id);
-        if ($item && !empty($item['file_path']) && is_file(BASE_PATH . '/public/' . $item['file_path'])) @unlink(BASE_PATH . '/public/' . $item['file_path']);
+        
+        if ($item && !empty($item['file_path'])) {
+            // 🛡️ Pastikan path absolut benar sebelum menghapus
+            $fileToDelete = BASE_PATH . '/public/' . ltrim($item['file_path'], '/');
+            if (is_file($fileToDelete)) {
+                @unlink($fileToDelete);
+            }
+        }
+        
         PlagiarismCheck::delete($id);
         self::flash('success', 'Data cek plagiat dihapus.');
         redirect(url('admin/index.php?page=plagiarism'));
