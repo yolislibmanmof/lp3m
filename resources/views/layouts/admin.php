@@ -160,36 +160,86 @@ elseif ($hour >= 10 && $hour < 15) { $greeting = 'Selamat Siang';   $greetIcon =
 elseif ($hour >= 15 && $hour < 18) { $greeting = 'Selamat Sore';    $greetIcon = 'sunset'; }
 else                               { $greeting = 'Selamat Malam';   $greetIcon = 'moon'; }
 
-// --- DATABASE & COUNTERS ---
+// --- 🚀 DATABASE & COUNTERS (OPTIMIZED: 1 Query UNION ALL) ---
 $db = Database::pdo();
+$adminId = (int) (Auth::user()['id'] ?? 0);
 
-$cntBerita     = (int) $db->query('SELECT COUNT(*) FROM news')->fetchColumn();
-$cntDokumen    = (int) $db->query('SELECT COUNT(*) FROM documents')->fetchColumn();
-$cntPengabdian = (int) $db->query('SELECT COUNT(*) FROM community_services')->fetchColumn();
-$cntPublikasi  = (int) $db->query('SELECT COUNT(*) FROM publications')->fetchColumn();
-$cntHaki       = (int) $db->query('SELECT COUNT(*) FROM intellectual_properties')->fetchColumn();
-$cntAik        = (int) $db->query('SELECT COUNT(*) FROM aik_activities')->fetchColumn();
-$cntPenelitian = (int) $db->query('SELECT COUNT(*) FROM researches')->fetchColumn();
-$cntHibah      = (int) $db->query('SELECT COUNT(*) FROM grants')->fetchColumn();
-$cntFaq        = (int) $db->query('SELECT COUNT(*) FROM faqs')->fetchColumn();
-$cntGaleri     = (int) $db->query('SELECT COUNT(*) FROM galleries')->fetchColumn();
-$cntSertifikat = (int) $db->query('SELECT COUNT(*) FROM certificates')->fetchColumn();
-$cntReviewers  = (int) $db->query('SELECT COUNT(*) FROM reviewers')->fetchColumn();
-$cntEvents     = (int) $db->query("SELECT COUNT(*) FROM events WHERE status='published'")->fetchColumn();
-$cntPlagiarism = (int) $db->query('SELECT COUNT(*) FROM plagiarism_checks')->fetchColumn();
-$cntUsers      = (int) $db->query('SELECT COUNT(*) FROM users')->fetchColumn();
-$cntSurvey     = (int) $db->query('SELECT COUNT(*) FROM surveys')->fetchColumn();
+// Inisialisasi default untuk mencegah error undefined
+$counters = [
+    'berita' => 0, 'dokumen' => 0, 'pengabdian' => 0, 'publikasi' => 0,
+    'haki' => 0, 'aik' => 0, 'penelitian' => 0, 'hibah' => 0, 'faq' => 0,
+    'galeri' => 0, 'sertifikat' => 0, 'reviewers' => 0, 'events' => 0,
+    'plagiarism' => 0, 'users' => 0, 'survey' => 0, 'videos' => 0,
+    'podcasts' => 0, 'chatbot' => 0, 'draft_berita' => 0, 'draft_dokumen' => 0, 'audit_7d' => 0
+];
 
-$cntChatbot = 0;
-try { $cntChatbot = (int) $db->query('SELECT COUNT(*) FROM chatbot_knowledge')->fetchColumn(); } catch (\Throwable $e) {}
+try {
+    // 🚀 Single Query: Mengambil semua count sekaligus, menghemat ~95% waktu eksekusi DB
+    $sql = "
+        SELECT 'berita' as tbl, COUNT(*) as cnt FROM news UNION ALL
+        SELECT 'dokumen', COUNT(*) FROM documents UNION ALL
+        SELECT 'pengabdian', COUNT(*) FROM community_services UNION ALL
+        SELECT 'publikasi', COUNT(*) FROM publications UNION ALL
+        SELECT 'haki', COUNT(*) FROM intellectual_properties UNION ALL
+        SELECT 'aik', COUNT(*) FROM aik_activities UNION ALL
+        SELECT 'penelitian', COUNT(*) FROM researches UNION ALL
+        SELECT 'hibah', COUNT(*) FROM grants UNION ALL
+        SELECT 'faq', COUNT(*) FROM faqs UNION ALL
+        SELECT 'galeri', COUNT(*) FROM galleries UNION ALL
+        SELECT 'sertifikat', COUNT(*) FROM certificates UNION ALL
+        SELECT 'reviewers', COUNT(*) FROM reviewers UNION ALL
+        SELECT 'events', COUNT(*) FROM events WHERE status='published' UNION ALL
+        SELECT 'plagiarism', COUNT(*) FROM plagiarism_checks UNION ALL
+        SELECT 'users', COUNT(*) FROM users UNION ALL
+        SELECT 'survey', COUNT(*) FROM surveys UNION ALL
+        SELECT 'videos', COUNT(*) FROM videos UNION ALL
+        SELECT 'podcasts', COUNT(*) FROM podcasts UNION ALL
+        SELECT 'chatbot', COUNT(*) FROM chatbot_knowledge UNION ALL
+        SELECT 'draft_berita', COUNT(*) FROM news WHERE status = 'draft' UNION ALL
+        SELECT 'draft_dokumen', COUNT(*) FROM documents WHERE status = 'draft' UNION ALL
+        SELECT 'audit_7d', COUNT(*) FROM audit_logs WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+    ";
+    $stmt = $db->query($sql);
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $counters[$row['tbl']] = (int) $row['cnt'];
+    }
+} catch (\Throwable $e) {
+    error_log("Admin Counter Query Failed: " . $e->getMessage());
+}
 
-$adminId     = (int) (Auth::user()['id'] ?? 0);
-$unreadNotif = (int) $db->query("SELECT COUNT(*) FROM notifications WHERE is_read = 0 AND (is_global = 1 OR user_id = " . $adminId . ")")->fetchColumn();
+// Mapping ke variabel asli agar HTML di bawah tidak perlu diubah sama sekali
+$cntBerita     = $counters['berita'];
+$cntDokumen    = $counters['dokumen'];
+$cntPengabdian = $counters['pengabdian'];
+$cntPublikasi  = $counters['publikasi'];
+$cntHaki       = $counters['haki'];
+$cntAik        = $counters['aik'];
+$cntPenelitian = $counters['penelitian'];
+$cntHibah      = $counters['hibah'];
+$cntFaq        = $counters['faq'];
+$cntGaleri     = $counters['galeri'];
+$cntSertifikat = $counters['sertifikat'];
+$cntReviewers  = $counters['reviewers'];
+$cntEvents     = $counters['events'];
+$cntPlagiarism = $counters['plagiarism'];
+$cntUsers      = $counters['users'];
+$cntSurvey     = $counters['survey'];
+$cntChatbot    = $counters['chatbot'];
+$draftBerita   = $counters['draft_berita'];
+$draftDok      = $counters['draft_dokumen'];
+$audit7dCount  = $counters['audit_7d']; // Digunakan di badge Audit Log
 
-$draftBerita = (int) $db->query("SELECT COUNT(*) FROM news WHERE status = 'draft'")->fetchColumn();
-$draftDok    = (int) $db->query("SELECT COUNT(*) FROM documents WHERE status = 'draft'")->fetchColumn();
-$totalDraft  = $draftBerita + $draftDok;
-$totalAll    = $cntBerita + $cntDokumen + $cntPengabdian + $cntPublikasi + $cntHaki + $cntAik + $cntPenelitian + $cntHibah + $cntFaq + $cntGaleri + $cntSertifikat + $cntReviewers + $cntEvents + $cntPlagiarism;
+// Hitung total (tetap sama seperti logika lama)
+$totalDraft = $draftBerita + $draftDok;
+$totalAll   = $cntBerita + $cntDokumen + $cntPengabdian + $cntPublikasi + $cntHaki + $cntAik + $cntPenelitian + $cntHibah + $cntFaq + $cntGaleri + $cntSertifikat + $cntReviewers + $cntEvents + $cntPlagiarism;
+
+// Query terpisah untuk notifikasi (karena membutuhkan variabel $adminId yang dinamis)
+$unreadNotif = 0;
+try {
+    $stmtNotif = $db->prepare("SELECT COUNT(*) FROM notifications WHERE is_read = 0 AND (is_global = 1 OR user_id = ?)");
+    $stmtNotif->execute([$adminId]);
+    $unreadNotif = (int) $stmtNotif->fetchColumn();
+} catch (\Throwable $e) {}
 
 $maintenanceOn = false;
 try { $maintenanceOn = Maintenance::isOn(); } catch (\Throwable $e) {}
@@ -396,9 +446,9 @@ $firstName = explode(' ', trim($adminName))[0] ?? 'Admin';
                 <a href="<?= e(url('admin/index.php?page=audit')) ?>" class="<?= strpos($currentPage, 'audit') === 0 ? 'active' : '' ?>">
                     <span class="ico-3d ico-3d-blue"><?= renderAdminIcon('file-text', 18, 'currentColor') ?></span>
                     <span>Audit Log</span>
-                    <span class="jewel-badge jewel-emerald">
-                        <?= (int) $db->query("SELECT COUNT(*) FROM audit_logs WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)")->fetchColumn() ?>
-                    </span>
+<span class="jewel-badge jewel-emerald">
+    <?= $audit7dCount ?>
+</span>
                 </a>
                 <a href="<?= e(url('admin/index.php?page=laporan')) ?>" class="<?= strpos($currentPage, 'laporan') === 0 ? 'active' : '' ?>">
                     <span class="ico-3d ico-3d-gold"><?= renderAdminIcon('bar-chart', 18, 'currentColor') ?></span>

@@ -2,7 +2,12 @@
 
 require dirname(__DIR__) . '/app/bootstrap.php';
 
-$page = $_GET['page'] ?? 'dashboard';
+// 🛡️ SANITASI INPUT: Pastikan $page hanya berisi huruf, angka, dan tanda hubung
+$rawPage = $_GET['page'] ?? 'dashboard';
+$page = preg_replace('/[^a-zA-Z0-9\-]/', '', $rawPage);
+if ($page === '') {
+    $page = 'dashboard';
+}
 
 // ══════════════════════════════════════════════════════════════
 // LOGOUT
@@ -39,6 +44,7 @@ if ($page === 'login') {
                 $user = $stmt->fetch();
 
                 if ($user && password_verify($password, $user['password'])) {
+                    // 🛡️ PATCH: Pastikan method login di Auth.php sudah diupdate dengan session_regenerate_id
                     Auth::login($user);
                     redirect(url('admin/index.php?page=dashboard'));
                 } else {
@@ -64,47 +70,60 @@ Auth::guard();
 // ══════════════════════════════════════════════════════════════
 // 🛡️ RBAC GUARD — pembatasan hak akses berdasarkan role
 // ══════════════════════════════════════════════════════════════
-$__role = Auth::user()['role'] ?? '';
-
-// Halaman yang boleh dibuka SEMUA role yang login
-$__openForAll = ['dashboard', 'profil-saya'];
-
-// Modul KHUSUS Super Admin (prefix mengunci semua sub-route)
-$__superOnly = ['users', 'backup', 'audit', 'broadcast', 'pengaturan', 'chatbot-config'];
-
-// Akses spesifik tambahan untuk role non-staf (sesuaikan kebutuhan)
-$__extraForRole = [
-    'dosen'    => [], // nanti bisa ditambah: ['penelitian', 'publikasi', 'haki']
-    'reviewer' => [], // nanti bisa ditambah: ['reviewers']
-    'pimpinan' => ['laporan'], // pimpinan bisa akses laporan
-    'mahasiswa'=> [],
-];
-
+$__role = Auth::user()['role'] ?? 'guest';
 $__denied = false;
 
-// Aturan A: role non-staf hanya boleh openForAll + extraForRole
-if (in_array($__role, ['dosen', 'reviewer', 'pimpinan', 'mahasiswa'], true)
-    && !in_array($page, $__openForAll, true)) {
-    $__ok = false;
-    foreach ($__extraForRole[$__role] ?? [] as $__p) {
-        if ($page === $__p || str_starts_with($page, $__p . '-')) { $__ok = true; break; }
+// 1. Daftar route yang BOLEH diakses SEMUA role yang sudah login
+$__openForAll = ['dashboard', 'profil-saya'];
+
+// 2. Daftar route KHUSUS Super Admin (prefix mengunci sub-route, misal: 'users' mengunci 'users-tambah')
+$__superOnly = ['users', 'backup', 'audit', 'broadcast', 'pengaturan', 'chatbot-config'];
+
+// 3. Akses spesifik tambahan untuk role non-staf
+$__extraForRole = [
+    'dosen'     => [], // Tambahkan nanti: ['penelitian', 'publikasi', 'haki']
+    'reviewer'  => [], // Tambahkan nanti: ['reviewers']
+    'pimpinan'  => ['laporan'], 
+    'mahasiswa' => [],
+];
+
+// ── ATURAN A: Role non-staf hanya boleh akses openForAll + extraForRole ──
+if (in_array($__role, ['dosen', 'reviewer', 'pimpinan', 'mahasiswa'], true)) {
+    $__allowed = array_merge($__openForAll, $__extraForRole[$__role] ?? []);
+    $__isAllowed = false;
+    
+    foreach ($__allowed as $__p) {
+        // Cek kecocokan exact match atau prefix match
+        if ($page === $__p || str_starts_with($page, $__p . '-')) {
+            $__isAllowed = true;
+            break;
+        }
     }
-    if (!$__ok) $__denied = true;
+    
+    if (!$__isAllowed) {
+        $__denied = true;
+    }
 }
 
-// Aturan B: modul super-only dikunci untuk selain super_admin (termasuk admin_lp3m)
+// ── ATURAN B: Modul super-only dikunci ketat untuk selain super_admin ──
 if (!$__denied && $__role !== 'super_admin') {
     foreach ($__superOnly as $__p) {
-        if ($page === $__p || str_starts_with($page, $__p . '-')) { $__denied = true; break; }
+        if ($page === $__p || str_starts_with($page, $__p . '-')) {
+            $__denied = true;
+            break;
+        }
     }
 }
 
+// ── EKSEKUSI PENOLAKAN ──
 if ($__denied) {
     http_response_code(403);
-    $_SESSION['flash'] = ['type' => 'error', 'message' => '🚫 Akses ditolak — role Anda tidak memiliki izin untuk modul ini.'];
+    $_SESSION['flash'] = [
+        'type' => 'error', 
+        'message' => '🚫 Akses ditolak — Role "' . e($__role) . '" tidak memiliki izin untuk modul ini.'
+    ];
     redirect(url('admin/index.php?page=dashboard'));
 }
-
 // ══════════════════════════════════════════════════════════════
 // ROUTING
 // ══════════════════════════════════════════════════════════════
@@ -236,6 +255,30 @@ switch ($page) {
         break;
     case 'publikasi-hapus':
         AdminPublication::destroy();
+        break;
+
+        // ── Publikasi Ilmiah ──────────────────────────────────────
+    case 'publikasi':
+        AdminPublication::index();
+        break;
+    case 'publikasi-tambah':
+        AdminPublication::create();
+        break;
+    case 'publikasi-simpan':
+        AdminPublication::store();
+        break;
+    case 'publikasi-edit':
+        AdminPublication::edit((int) ($_GET['id'] ?? 0));
+        break;
+    case 'publikasi-update':
+        AdminPublication::update();
+        break;
+    case 'publikasi-hapus':
+        AdminPublication::destroy();
+        break;
+    // 🌟 PATCH: Route untuk fitur Auto-Fetch DOI dari Crossref
+    case 'publikasi-fetch-doi':
+        AdminPublication::fetchDoi();
         break;
 
     // ── HAKI (Hak Kekayaan Intelektual) ───────────────────────

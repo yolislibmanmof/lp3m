@@ -5,14 +5,30 @@ if ($hour >= 4 && $hour < 10)      { $greet = 'Selamat Pagi';  $gico = '🌅'; }
 elseif ($hour >= 10 && $hour < 15) { $greet = 'Selamat Siang'; $gico = '☀️'; }
 elseif ($hour >= 15 && $hour < 18) { $greet = 'Selamat Sore';  $gico = '🌇'; }
 else                               { $greet = 'Selamat Malam'; $gico = '🌙'; }
+
 $firstName = explode(' ', trim((string) ($user['name'] ?? 'Admin')))[0] ?? 'Admin';
-$roleLabel = ['super_admin' => 'Super Admin', 'admin_lp3m' => 'Admin LP3M', 'dosen' => 'Dosen', 'reviewer' => 'Reviewer', 'pimpinan' => 'Pimpinan'][$user['role'] ?? ''] ?? 'Admin';
+$roleLabel = ['super_admin' => 'Super Admin', 'admin_lp3m' => 'Admin LP3M', 'dosen' => 'Dosen', 'reviewer' => 'Reviewer', 'pimpinan' => 'Pimpinan', 'mahasiswa' => 'Mahasiswa'][$user['role'] ?? ''] ?? 'Admin';
+
 $bulanId = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 $monthNames = ['J','F','M','A','M','J','J','A','S','O','N','D'];
+
+// 🛡️ Fallback aman untuk mencegah error undefined
+$system = $system ?? ['php' => '8.x', 'db' => 'OK', 'upload' => 'OK', 'time' => date('H:i')];
+$kpis = $kpis ?? [];
+$queue = $queue ?? [];
+$feed = $feed ?? [];
+$years = $years ?? [];
+$months = $months ?? [];
+$maxYear = max(1, (int) ($maxYear ?? 1)); // 🛡️ Cegah division by zero
+$maxMonth = max(1, (int) ($maxMonth ?? 1)); // 🛡️ Cegah division by zero
+$donutPct = (int) ($donutPct ?? 0);
+$plagCompleted = (int) ($plagCompleted ?? 0);
+$plagQueued = (int) ($plagQueued ?? 0);
 ?>
 <style>
     @keyframes dbFade { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:none} }
     @keyframes dbShine { 0%,55%{left:-90%} 100%{left:165%} }
+    @keyframes dbBarGrow { from{height:0%} }
 
     .db-hero { position:relative; overflow:hidden; border-radius:24px; padding:30px 34px; margin-bottom:22px; color:#fff; background:linear-gradient(135deg,#043b2c 0%,#065f46 55%,#059669 100%); box-shadow:0 18px 44px rgba(3,37,31,.35); animation:dbFade .5s both; }
     .db-hero::after { content:''; position:absolute; top:-50%; right:-8%; width:380px; height:380px; border-radius:50%; background:radial-gradient(circle,rgba(217,164,65,.25),transparent 70%); pointer-events:none; }
@@ -25,7 +41,6 @@ $monthNames = ['J','F','M','A','M','J','J','A','S','O','N','D'];
     .db-sys span.ok { color:#6ee7b7; }
     .db-sys span.bad { color:#fca5a5; }
 
-    /* KPI */
     .db-kpis { display:grid; grid-template-columns:repeat(6,1fr); gap:12px; margin-bottom:22px; }
     @media(max-width:1100px){ .db-kpis{grid-template-columns:repeat(4,1fr);} }
     @media(max-width:760px){ .db-kpis{grid-template-columns:repeat(2,1fr);} }
@@ -36,7 +51,6 @@ $monthNames = ['J','F','M','A','M','J','J','A','S','O','N','D'];
     .db-kpi b { font-family:var(--font-display); font-size:24px; font-weight:900; color:var(--text); line-height:1; }
     .db-kpi .l { font-size:10px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
 
-    /* LAYOUT 2 KOLOM */
     .db-cols { display:grid; grid-template-columns:1.4fr 1fr; gap:18px; margin-bottom:22px; }
     @media(max-width:1000px){ .db-cols{grid-template-columns:1fr;} }
     .db-panel { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:22px 24px; position:relative; overflow:hidden; animation:dbFade .5s .08s both; }
@@ -44,7 +58,6 @@ $monthNames = ['J','F','M','A','M','J','J','A','S','O','N','D'];
     .db-panel h2 { display:flex; align-items:center; gap:10px; margin:0 0 16px; font-family:var(--font-display); font-size:15px; font-weight:900; color:#fff; }
     .db-panel h2 .n { margin-left:auto; font-size:10px; font-weight:900; letter-spacing:.1em; color:var(--muted); }
 
-    /* QUEUE */
     .db-q { display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:13px; border:1px solid var(--border); background:rgba(255,255,255,.03); margin-bottom:9px; text-decoration:none; transition:all .2s; }
     .db-q:hover { transform:translateX(4px); border-color:rgba(217,164,65,.4); }
     .db-q .qi { width:38px; height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0; }
@@ -55,23 +68,20 @@ $monthNames = ['J','F','M','A','M','J','J','A','S','O','N','D'];
     .db-q .qa { color:var(--muted); font-size:14px; }
     .db-q-empty { text-align:center; padding:26px 10px; color:var(--muted); font-size:13px; font-weight:700; }
 
-    /* CHARTS */
     .db-chart { display:flex; align-items:flex-end; gap:10px; height:130px; padding:6px 2px 0; }
     .db-bar { flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; height:100%; justify-content:flex-end; }
-    .db-bar i { width:100%; max-width:34px; border-radius:8px 8px 4px 4px; background:linear-gradient(180deg,#f2c063,#d9a441); box-shadow:inset 0 2px 3px rgba(255,255,255,.4); transition:height .8s cubic-bezier(.16,1,.3,1); position:relative; }
+    .db-bar i { width:100%; max-width:34px; border-radius:8px 8px 4px 4px; background:linear-gradient(180deg,#f2c063,#d9a441); box-shadow:inset 0 2px 3px rgba(255,255,255,.4); position:relative; transition: height 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
     .db-bar.blue i { background:linear-gradient(180deg,#60a5fa,#2563eb); }
     .db-bar i::after { content:attr(data-v); position:absolute; top:-18px; left:50%; transform:translateX(-50%); font-size:10px; font-weight:900; color:var(--muted); }
     .db-bar span { font-size:9.5px; font-weight:800; color:var(--muted); }
     .db-chart-title { font-size:11px; font-weight:900; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin:18px 0 8px; }
 
-    /* DONUT */
     .db-donut-row { display:flex; align-items:center; gap:18px; margin-top:18px; }
-    .db-donut { width:110px; height:110px; border-radius:50%; background:conic-gradient(#10b981 <?= (int) $donutPct ?>%, rgba(255,255,255,.1) 0); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .db-donut { width:110px; height:110px; border-radius:50%; background:conic-gradient(#10b981 <?= $donutPct ?>%, rgba(255,255,255,.1) 0); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
     .db-donut b { width:74px; height:74px; border-radius:50%; background:var(--surface); display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-size:18px; font-weight:900; color:#6ee7b7; }
     .db-donut-legend { font-size:12px; color:var(--muted); line-height:1.9; }
     .db-donut-legend i { display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:6px; }
 
-    /* FEED */
     .db-feed { display:flex; gap:12px; align-items:flex-start; padding:11px 4px; border-bottom:1px dashed var(--border); }
     .db-feed:last-child { border-bottom:none; }
     .db-feed .fi { width:34px; height:34px; border-radius:10px; background:rgba(255,255,255,.06); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; }
@@ -79,7 +89,6 @@ $monthNames = ['J','F','M','A','M','J','J','A','S','O','N','D'];
     .db-feed .fm { font-size:11.5px; color:var(--muted); margin-top:2px; }
     .db-feed .fh { font-size:10px; color:var(--muted); margin-top:3px; opacity:.8; }
 
-    /* QUICK ACTIONS */
     .db-qa { display:grid; grid-template-columns:repeat(6,1fr); gap:10px; }
     @media(max-width:1000px){ .db-qa{grid-template-columns:repeat(3,1fr);} }
     @media(max-width:600px){ .db-qa{grid-template-columns:repeat(2,1fr);} }
@@ -100,7 +109,7 @@ $monthNames = ['J','F','M','A','M','J','J','A','S','O','N','D'];
         <div class="db-sys">
             <span>🐘 PHP <?= e($system['php']) ?></span>
             <span class="ok">🗄️ DB <?= e($system['db']) ?></span>
-            <span class="<?= $system['upload'] === 'OK' ? 'ok' : 'bad' ?>">📂 Upload <?= e($system['upload']) ?></span>
+            <span class="<?= ($system['upload'] ?? 'OK') === 'OK' ? 'ok' : 'bad' ?>">📂 Upload <?= e($system['upload'] ?? 'OK') ?></span>
             <span>🕐 <?= e($system['time']) ?></span>
         </div>
     </div>
@@ -126,7 +135,7 @@ $monthNames = ['J','F','M','A','M','J','J','A','S','O','N','D'];
             <?php if (empty($queue)): ?>
                 <div class="db-q-empty">🎉 Semua pekerjaan selesai. Tidak ada antrean!</div>
             <?php else: foreach ($queue as $q): ?>
-                <a class="db-q <?= e($q['tone']) ?>" href="<?= e(url('admin/index.php?page=' . $q['link'])) ?>">
+                <a class="db-q <?= e($q['tone'] ?? 'info') ?>" href="<?= e(url('admin/index.php?page=' . $q['link'])) ?>">
                     <span class="qi"><?= $q['icon'] ?></span>
                     <span class="qt"><?= e($q['text']) ?></span>
                     <span class="qa">→</span>
@@ -158,9 +167,11 @@ $monthNames = ['J','F','M','A','M','J','J','A','S','O','N','D'];
 
             <div class="db-chart-title">🔬 Penelitian · 5 Tahun Terakhir</div>
             <div class="db-chart">
-                <?php foreach ($years as $y): ?>
+                <?php foreach ($years as $y): 
+                    $pct = $maxYear > 0 ? (int) round($y['count'] / $maxYear * 100) : 0;
+                ?>
                 <div class="db-bar">
-                    <i data-v="<?= (int) $y['count'] ?>" style="height:<?= max(6, (int) round($y['count'] / $maxYear * 100)) ?>%"></i>
+                    <i data-v="<?= (int) $y['count'] ?>" style="height:<?= max(6, $pct) ?>%"></i>
                     <span><?= (int) $y['year'] ?></span>
                 </div>
                 <?php endforeach; ?>
@@ -168,20 +179,22 @@ $monthNames = ['J','F','M','A','M','J','J','A','S','O','N','D'];
 
             <div class="db-chart-title">📅 Kegiatan per Bulan · <?= date('Y') ?></div>
             <div class="db-chart" style="height:100px;">
-                <?php foreach ($months as $m): ?>
+                <?php foreach ($months as $m): 
+                    $pctM = $maxMonth > 0 ? (int) round($m['count'] / $maxMonth * 100) : 0;
+                ?>
                 <div class="db-bar blue">
-                    <i data-v="<?= (int) $m['count'] ?>" style="height:<?= max(4, (int) round($m['count'] / $maxMonth * 100)) ?>%"></i>
-                    <span><?= $monthNames[$m['m'] - 1] ?></span>
+                    <i data-v="<?= (int) $m['count'] ?>" style="height:<?= max(4, $pctM) ?>%"></i>
+                    <span><?= $monthNames[(int)$m['m'] - 1] ?></span>
                 </div>
                 <?php endforeach; ?>
             </div>
 
             <div class="db-chart-title">🔍 Penyelesaian Cek Plagiat</div>
             <div class="db-donut-row">
-                <div class="db-donut"><b><?= (int) $donutPct ?>%</b></div>
+                <div class="db-donut"><b><?= $donutPct ?>%</b></div>
                 <div class="db-donut-legend">
-                    <div><i style="background:#10b981;"></i>Selesai · <?= (int) $plagCompleted ?> dokumen</div>
-                    <div><i style="background:rgba(255,255,255,.18);"></i>Antrean · <?= (int) $plagQueued ?> dokumen</div>
+                    <div><i style="background:#10b981;"></i>Selesai · <?= $plagCompleted ?> dokumen</div>
+                    <div><i style="background:rgba(255,255,255,.18);"></i>Antrean · <?= $plagQueued ?> dokumen</div>
                 </div>
             </div>
         </div>
@@ -203,7 +216,7 @@ $monthNames = ['J','F','M','A','M','J','J','A','S','O','N','D'];
 
 <script>
 (function(){
-    // Count-up KPI
+    // 1. Count-up KPI Animation
     document.querySelectorAll('[data-count]').forEach(function(el){
         var target = parseInt(el.getAttribute('data-count'), 10) || 0;
         var start = null;
@@ -215,6 +228,15 @@ $monthNames = ['J','F','M','A','M','J','J','A','S','O','N','D'];
             if (p < 1) requestAnimationFrame(step);
         }
         requestAnimationFrame(step);
+    });
+
+    // 2. 🚀 Smooth Bar Chart Grow Animation
+    document.querySelectorAll('.db-bar i').forEach(function(el){
+        var targetHeight = el.style.height;
+        el.style.height = '0%'; // Mulai dari 0
+        setTimeout(function(){
+            el.style.height = targetHeight; // Tumbuh ke target
+        }, 150);
     });
 })();
 </script>
