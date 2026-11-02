@@ -8,7 +8,6 @@ class PlagiarismCheck
     public const STATUSES = ['queued' => '⏳ Antre', 'processing' => '⚙️ Diproses', 'completed' => '✅ Selesai', 'failed' => '❌ Gagal'];
     public const THRESHOLD = 25.0;
 
-    /** Paksa UTF-8 valid + buang byte kontrol — dipakai di SEMUA jalur simpan (anti 1366) */
     public static function sanitizeText(string $s): string
     {
         if ($s === '') return '';
@@ -207,54 +206,103 @@ class PlagiarismCheck
         return ['#10b981', 'RENDAH — AMAN'];
     }
 
+    // 🚀 PATCH: Optimasi Memori & Akurasi (Mencegah Out of Memory)
     public static function analyze(string $text): array
     {
         $text = self::sanitizeText($text);
         $clean = mb_strtolower(trim(preg_replace('/\s+/u', ' ', preg_replace('/[^\p{L}\p{N}\s]/u', ' ', strip_tags($text)))));
         $words = array_values(array_filter(preg_split('/\s+/u', $clean), fn($w) => $w !== ''));
         $wordCount = count($words);
-        $unique = count(array_unique($words));
-        $uniqueRatio = $wordCount > 0 ? $unique / $wordCount : 0;
+        
+        // 🛡️ Safeguard: Teks terlalu pendek
+        if ($wordCount < 20) {
+            return ['error' => 'Teks terlalu pendek untuk dianalisis (minimal 20 kata).'];
+        }
 
+        $unique = count(array_unique($words));
+        $uniqueRatio = $unique / $wordCount;
+
+        $shingleSize = 5; // 5-gram lebih optimal untuk Bahasa Indonesia
         $shingles = [];
-        for ($i = 0; $i + 6 <= $wordCount; $i++) $shingles[] = implode(' ', array_slice($words, $i, 6));
+        for ($i = 0; $i + $shingleSize <= $wordCount; $i++) {
+            $shingles[] = implode(' ', array_slice($words, $i, $shingleSize));
+        }
         $shSet = array_values(array_unique($shingles));
         $selfDup = count($shingles) > 0 ? 1 - (count($shSet) / count($shingles)) : 0;
 
-        $corpus = [];
         $pdo = Database::pdo();
-        foreach ($pdo->query("SELECT title, content FROM news WHERE status='published'") as $r) $corpus[] = ['t' => 'Berita Internal', 'n' => $r['title'], 'x' => (string) $r['content']];
-        foreach ($pdo->query('SELECT title, description FROM researches') as $r) $corpus[] = ['t' => 'Proposal Penelitian', 'n' => $r['title'], 'x' => (string) $r['description']];
-        foreach ($pdo->query('SELECT title, description FROM community_services') as $r) $corpus[] = ['t' => 'Laporan Pengabdian', 'n' => $r['title'], 'x' => (string) $r['description']];
-
         $sources = [];
-        foreach ($corpus as $doc) {
-            $dc = mb_strtolower(trim(preg_replace('/\s+/u', ' ', preg_replace('/[^\p{L}\p{N}\s]/u', ' ', strip_tags($doc['x'])))));
-            $dw = array_values(array_filter(preg_split('/\s+/u', $dc), fn($w) => $w !== ''));
-            if (count($dw) < 40) continue;
-            $dset = [];
-            for ($i = 0; $i + 6 <= count($dw); $i++) $dset[implode(' ', array_slice($dw, $i, 6))] = $i;
-            $hit = 0; $firstIdx = null;
-            foreach ($shSet as $sh) {
-                if (isset($dset[$sh])) { $hit++; if ($firstIdx === null) $firstIdx = $dset[$sh]; }
-            }
-            $contain = count($shSet) > 0 ? $hit / count($shSet) : 0;
-            if ($contain >= 0.01) {
-                $snippet = $firstIdx !== null ? implode(' ', array_slice($dw, $firstIdx, 24)) : mb_substr($dc, 0, 140);
-                $sources[] = ['source_type' => 'internal', 'source_title' => $doc['n'] . ' (' . $doc['t'] . ')', 'match_percentage' => round($contain * 100, 2), 'snippet' => $snippet . '...'];
+
+        // 🚀 OPTIMASI: Hanya ambil 50 kandidat terpanjang per tabel, BUKAN semua data
+        $candidateTables = [
+            ['table' => 'news', 'title_col' => 'title', 'content_col' => 'content', 'type' => 'Berita Internal', 'where' => "status='published'"],
+            ['table' => 'researches', 'title_col' => 'title', 'content_col' => 'description', 'type' => 'Proposal Penelitian', 'where' => '1=1'],
+            ['table' => 'community_services', 'title_col' => 'title', 'content_col' => 'description', 'type' => 'Laporan Pengabdian', 'where' => '1=1'],
+        ];
+
+        foreach ($candidateTables as $ct) {
+            try {
+                $stmt = $pdo->prepare("
+                    SELECT {$ct['title_col']} as title, {$ct['content_col']} as content 
+                    FROM {$ct['table']} 
+                    WHERE {$ct['where']} 
+                    AND ({$ct['content_col']} IS NOT NULL AND {$ct['content_col']} != '')
+                    ORDER BY CHAR_LENGTH({$ct['content_col']}) DESC 
+                    LIMIT 50
+                ");
+                $stmt->execute();
+                $candidates = $stmt->fetchAll();
+
+                foreach ($candidates as $doc) {
+                    $dc = mb_strtolower(trim(preg_replace('/\s+/u', ' ', preg_replace('/[^\p{L}\p{N}\s]/u', ' ', strip_tags($doc['content'])))));
+                    $dw = array_values(array_filter(preg_split('/\s+/u', $dc), fn($w) => $w !== ''));
+                    if (count($dw) < 40) continue;
+                    
+                    $dset = [];
+                    for ($i = 0; $i + $shingleSize <= count($dw); $i++) {
+                        $dset[implode(' ', array_slice($dw, $i, $shingleSize))] = $i;
+                    }
+                    
+                    $hit = 0; $firstIdx = null;
+                    foreach ($shSet as $sh) {
+                        if (isset($dset[$sh])) { 
+                            $hit++; 
+                            if ($firstIdx === null) $firstIdx = $dset[$sh]; 
+                        }
+                    }
+                    
+                    $contain = count($shSet) > 0 ? $hit / count($shSet) : 0;
+                    if ($contain >= 0.01) {
+                        $snippet = $firstIdx !== null ? implode(' ', array_slice($dw, $firstIdx, 24)) : mb_substr($dc, 0, 140);
+                        $sources[] = [
+                            'source_type' => 'internal', 
+                            'source_title' => $doc['title'] . ' (' . $ct['type'] . ')', 
+                            'match_percentage' => round($contain * 100, 2), 
+                            'snippet' => $snippet . '...'
+                        ];
+                    }
+                }
+            } catch (\Throwable $e) {
+                error_log("Plagiarism check error on {$ct['table']}: " . $e->getMessage());
             }
         }
 
         usort($sources, fn($a, $b) => $b['match_percentage'] <=> $a['match_percentage']);
-        $sources = array_slice($sources, 0, 10);
+        $sources = array_slice($sources, 0, 10); // Ambil top 10 sumber teratas
+        
         $external = (float) ($sources[0]['match_percentage'] ?? 0);
         $similarity = round(min(100, $external * 0.6 + ($selfDup * 100) * 0.4), 2);
         $ai = round(min(100, max(0, (1 - $uniqueRatio) * 90 + $selfDup * 30)), 2);
 
         return [
-            'word_count' => $wordCount, 'unique_ratio' => round($uniqueRatio, 4), 'self_dup' => round($selfDup, 4),
-            'external' => $external, 'similarity' => $similarity, 'unique_score' => round(100 - $similarity, 2),
-            'ai' => $ai, 'sources' => $sources,
+            'word_count' => $wordCount, 
+            'unique_ratio' => round($uniqueRatio, 4), 
+            'self_dup' => round($selfDup, 4),
+            'external' => $external, 
+            'similarity' => $similarity, 
+            'unique_score' => round(100 - $similarity, 2),
+            'ai' => $ai, 
+            'sources' => $sources,
         ];
     }
 }

@@ -53,7 +53,6 @@ class AdminPublication
         }
 
         $errors = self::validate();
-
         if ($errors !== []) {
             $_SESSION['old'] = $_POST;
             self::flash(implode(' ', $errors), 'error');
@@ -68,8 +67,14 @@ class AdminPublication
     public static function edit(int $id): void
     {
         $item = Publication::find($id);
-
         if ($item === null) {
+            redirect(url('admin/index.php?page=publikasi'));
+        }
+
+        // 🛡️ PATCH: IDOR Protection (Cek Kepemilikan)
+        $currentUser = Auth::user();
+        if ($currentUser['role'] !== 'super_admin' && (int)($item['user_id'] ?? 0) !== (int)$currentUser['id']) {
+            self::flash('Anda tidak memiliki izin untuk mengedit publikasi ini.', 'error');
             redirect(url('admin/index.php?page=publikasi'));
         }
 
@@ -90,13 +95,20 @@ class AdminPublication
         }
 
         $id = (int) ($_POST['id'] ?? 0);
+        $item = Publication::find($id);
 
-        if (Publication::find($id) === null) {
+        if ($item === null) {
+            redirect(url('admin/index.php?page=publikasi'));
+        }
+
+        // 🛡️ PATCH: IDOR Protection (Cek Kepemilikan)
+        $currentUser = Auth::user();
+        if ($currentUser['role'] !== 'super_admin' && (int)($item['user_id'] ?? 0) !== (int)$currentUser['id']) {
+            self::flash('Akses ditolak.', 'error');
             redirect(url('admin/index.php?page=publikasi'));
         }
 
         $errors = self::validate();
-
         if ($errors !== []) {
             $_SESSION['old'] = $_POST;
             self::flash(implode(' ', $errors), 'error');
@@ -115,19 +127,75 @@ class AdminPublication
         }
 
         $id = (int) ($_POST['id'] ?? 0);
+        $item = Publication::find($id);
 
-        if (Publication::find($id) !== null) {
-            Publication::delete($id);
-            self::flash('Publikasi berhasil dihapus.');
+        if ($item !== null) {
+            // 🛡️ PATCH: IDOR Protection (Cek Kepemilikan)
+            $currentUser = Auth::user();
+            if ($currentUser['role'] !== 'super_admin' && (int)($item['user_id'] ?? 0) !== (int)$currentUser['id']) {
+                self::flash('Akses ditolak.', 'error');
+            } else {
+                Publication::delete($id);
+                self::flash('Publikasi berhasil dihapus.');
+            }
+        }
+        redirect(url('admin/index.php?page=publikasi'));
+    }
+
+    // 🌟 PATCH: Fitur Unik Auto-Fetch DOI dari Crossref API
+    public static function fetchDoi(): void
+    {
+        header('Content-Type: application/json');
+        $doi = trim($_GET['doi'] ?? $_POST['doi'] ?? '');
+        
+        if (empty($doi)) {
+            echo json_encode(['error' => 'DOI tidak boleh kosong']);
+            exit;
         }
 
-        redirect(url('admin/index.php?page=publikasi'));
+        // Bersihkan DOI (hapus URL prefix jika user paste full URL)
+        $doi = preg_replace('/^https?:\/\/doi\.org\//i', '', $doi);
+
+        try {
+            $context = stream_context_create([
+                'http' => [
+                    'timeout' => 5,
+                    'header' => "Accept: application/json\r\nUser-Agent: LP3M-UNIMOF/1.0\r\n"
+                ]
+            ]);
+            $url = 'https://api.crossref.org/works/' . urlencode($doi);
+            $response = @file_get_contents($url, false, $context);
+            
+            if ($response === false) {
+                echo json_encode(['error' => 'Gagal menghubungi API Crossref. Periksa koneksi.']);
+                exit;
+            }
+
+            $data = json_decode($response, true);
+            
+            if (isset($data['message'])) {
+                $msg = $data['message'];
+                $result = [
+                    'title' => $msg['title'][0] ?? '',
+                    'authors' => isset($msg['author']) ? implode(', ', array_map(fn($a) => trim(($a['given'] ?? '') . ' ' . ($a['family'] ?? '')), $msg['author'])) : '',
+                    'source' => $msg['container-title'][0] ?? ($msg['publisher'] ?? ''),
+                    'year' => isset($msg['published']['date-parts'][0][0]) ? (int)$msg['published']['date-parts'][0][0] : date('Y'),
+                    'link' => $msg['URL'] ?? ('https://doi.org/' . $doi),
+                    'type' => 'jurnal'
+                ];
+                echo json_encode(['success' => true, 'data' => $result]);
+            } else {
+                echo json_encode(['error' => 'DOI tidak ditemukan di database Crossref.']);
+            }
+        } catch (\Throwable $e) {
+            echo json_encode(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
+        }
+        exit;
     }
 
     private static function validate(): array
     {
         $errors = [];
-
         if (trim($_POST['title'] ?? '') === '') $errors[] = 'Judul wajib diisi.';
         if (trim($_POST['authors'] ?? '') === '') $errors[] = 'Penulis wajib diisi.';
         if (!array_key_exists($_POST['type'] ?? '', Publication::TYPES)) $errors[] = 'Tipe tidak valid.';
