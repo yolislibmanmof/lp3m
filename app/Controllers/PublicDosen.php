@@ -130,4 +130,21 @@ class PublicDosen
         require $viewFile;
         echo ob_get_clean();
     }
+
+        /**
+     * Researcher Marketplace: Direktori Kolaborasi Cerdas (FULLTEXT Search)
+     */
+    public static function marketplace(): void
+    {
+        $q = trim($_GET['q'] ?? '');
+        
+        // Memanggil method searchResearchers yang baru ditambahkan di Model User
+        $researchers = \User::searchResearchers($q, 50);
+
+        View::render('public/dosen/marketplace', [
+            'title' => 'Direktori Kolaborasi Peneliti | ' . APP_NAME,
+            'researchers' => $researchers,
+            'q' => $q,
+        ]);
+    }
 }

@@ -184,6 +184,11 @@ switch ($page) {
         PublicDosen::exportCv((int) ($_GET['id'] ?? 0));
         break;
 
+    // 🚀 FITUR BARU: Researcher Marketplace
+    case 'dosen-marketplace':
+        PublicDosen::marketplace();
+        break;
+
     case 'subscribe':   PublicSubscribe::subscribe(); break;
     case 'unsubscribe': PublicSubscribe::unsubscribe(); break;
 

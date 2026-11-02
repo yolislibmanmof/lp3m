@@ -193,6 +193,11 @@ $topCount = $topKey !== null ? $sorted[$topKey]['count'] : 0;
     <span class="spacer"></span>
     <a href="<?= e(url('admin/index.php?page=laporan-print&start=' . urlencode($start) . '&end=' . urlencode($end))) ?>" target="_blank">🖨️ Print / PDF</a>
     <a class="ghost" href="<?= e(url('admin/index.php?page=laporan-tahunan&tahun=' . date('Y'))) ?>">📅 Laporan Tahunan</a>
+    
+    <!-- 🚀 FITUR BARU: Tombol Download Laporan Kinerja Tahunan -->
+    <a class="ghost" href="<?= e(url('admin/index.php?page=laporan-export-tahunan&year=' . date('Y'))) ?>" style="border-color: rgba(16,185,129,0.5); color: #10b981;">
+        📥 Export CSV Kinerja
+    </a>
 </form>
 
 <!-- QUICK STATS -->

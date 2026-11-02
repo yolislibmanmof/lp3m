@@ -119,4 +119,38 @@ class User
     {
         return substr(str_replace(['/', '+', '='], '', base64_encode(random_bytes(18))), 0, $len);
     }
+
+       /**
+     * Mencari dosen/researcher berdasarkan kata kunci (FULLTEXT Search)
+     * Digunakan untuk fitur Researcher Marketplace
+     */
+    public static function searchResearchers(string $keyword = '', int $limit = 50): array
+    {
+        $pdo = Database::pdo();
+        $keyword = trim($keyword);
+        
+        if ($keyword !== '') {
+            // Pencarian berbasis relevansi (FULLTEXT) pada nama, bio, dan minat penelitian
+            $stmt = $pdo->prepare("
+                SELECT id, name, institution, bio, research_interests, sinta_url, scholar_url, orcid, photo
+                FROM users
+                WHERE role IN ('dosen', 'reviewer', 'pimpinan') AND is_active = 1
+                AND MATCH(name, bio, research_interests) AGAINST(? IN NATURAL LANGUAGE MODE)
+                LIMIT ?
+            ");
+            $stmt->execute([$keyword, $limit]);
+        } else {
+            // Tampilkan daftar peneliti aktif jika tidak ada kata kunci
+            $stmt = $pdo->prepare("
+                SELECT id, name, institution, bio, research_interests, sinta_url, scholar_url, orcid, photo
+                FROM users
+                WHERE role IN ('dosen', 'reviewer', 'pimpinan') AND is_active = 1
+                ORDER BY name ASC
+                LIMIT ?
+            ");
+            $stmt->execute([$limit]);
+        }
+        
+        return $stmt->fetchAll();
+    }
 }

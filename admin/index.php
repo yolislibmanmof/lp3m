@@ -257,7 +257,7 @@ switch ($page) {
         AdminPublication::destroy();
         break;
 
-        // ── Publikasi Ilmiah ──────────────────────────────────────
+    // ── Publikasi Ilmiah ──────────────────────────────────────
     case 'publikasi':
         AdminPublication::index();
         break;
@@ -276,7 +276,7 @@ switch ($page) {
     case 'publikasi-hapus':
         AdminPublication::destroy();
         break;
-    // 🌟 PATCH: Route untuk fitur Auto-Fetch DOI dari Crossref
+    // 🌟 FITUR BARU: Route untuk fitur Auto-Fetch DOI dari Crossref
     case 'publikasi-fetch-doi':
         AdminPublication::fetchDoi();
         break;
@@ -525,6 +525,9 @@ switch ($page) {
         break;
     case 'laporan-tahunan':
         AdminReport::annualReport((int) ($_GET['tahun'] ?? date('Y')));
+        break;
+    case 'laporan-export-tahunan':
+        AdminReport::exportAnnual();
         break;
 
     // ── Survei Kepuasan ────────────────────────────────────

@@ -51,6 +51,7 @@ $__descMap = [
     'agenda' => 'Kalender dan agenda kegiatan lembaga.',
     'survei' => 'Survei kepuasan layanan LP3M.',
     'dosen' => 'Profil akademik dosen LP3M.',
+    'dosen-marketplace' => 'Cari rekan kolaborasi penelitian dan dosen berdasarkan bidang keahlian di LP3M.',
     'cek-plagiat' => 'Pemeriksaan similaritas dokumen terhadap korpus internal.',
     'verifikasi-sertifikat' => 'Verifikasi keaslian sertifikat digital lembaga.',
 ];
@@ -336,10 +337,18 @@ function renderLayoutIcon($name, $size = 24, $color = 'currentColor') {
                     </div>
                 </li>
 
-                <li>
-                    <a href="<?= e(url('public/index.php?page=dosen')) ?>" class="<?= $__page === 'dosen' ? 'active' : '' ?>">
+                <li class="has-dropdown">
+                    <a href="#" class="dropdown-toggle <?= in_array($__page, ['dosen', 'dosen-marketplace'], true) ? 'active' : '' ?>">
                         <span class="nav-ico"><?= renderLayoutIcon('graduation-cap', 18, 'currentColor') ?></span>Dosen
                     </a>
+                    <div class="dropdown-menu">
+                        <a href="<?= e(url('public/index.php?page=dosen')) ?>" class="dropdown-link">
+                            <?= renderLayoutIcon('user', 16, 'currentColor') ?> Direktori Dosen
+                        </a>
+                        <a href="<?= e(url('public/index.php?page=dosen-marketplace')) ?>" class="dropdown-link">
+                            <?= renderLayoutIcon('search', 16, 'currentColor') ?> Cari Kolaborator Riset
+                        </a>
+                    </div>
                 </li>
 
                 <li class="has-dropdown">
